@@ -17,7 +17,6 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 e.Description,
                 e.Status,
 
-
             }).AsEnumerable());
         }
         [HttpGet]
@@ -27,8 +26,18 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Create (Brand brand)
+        public IActionResult Create (Brand brand, IFormFile image)
         {
+            if (image is not null && image.Length > 0) {
+
+                var fileName = Guid.NewGuid().ToString() +Path.GetExtension(image.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot\\images",fileName);
+                using (var stream = System.IO.File.Create(filePath))
+                { 
+                    image.CopyTo(stream);
+                }
+                brand.Img = fileName;
+            }
             _context.Brands.Add(brand);
             _context.SaveChanges();  
             return RedirectToAction(nameof(Index));
