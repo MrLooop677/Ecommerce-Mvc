@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
-namespace EcommerceMvc.Controllers
+namespace EcommerceMvc.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class HomeController : Controller
     {
         public IActionResult Index(FilterProductVM FilterProductVM,int page=1)

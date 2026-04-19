@@ -16,4 +16,10 @@
     </PackageReference>
   </ItemGroup>
 
+ 
+  <ItemGroup>
+    <Folder Include="Areas\Identity\Controllers\" />
+    <Folder Include="Areas\Identity\Views\" />
+  </ItemGroup>
+
 </Project>
