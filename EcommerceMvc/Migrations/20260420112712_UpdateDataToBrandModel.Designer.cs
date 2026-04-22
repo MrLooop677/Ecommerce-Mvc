@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceMvc.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260417121157_AddDataToCategoryModel")]
-    partial class AddDataToCategoryModel
+    [Migration("20260420112712_UpdateDataToBrandModel")]
+    partial class UpdateDataToBrandModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,10 @@ namespace EcommerceMvc.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Img")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")

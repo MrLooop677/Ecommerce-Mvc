@@ -1,4 +1,6 @@
 ﻿
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,26 +31,28 @@
                             <th>Name</th>
                             <th>Description</th>
                             <th>Status</th>
+                            <th>Img</th>
                             <th style="width: 200px;">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
 
-                        @foreach (var category in Model)
+                        @foreach (var Brand in Model)
                             {
                             <tr>
-                                <td>@category.ID</td>
-                                <td>@category.Name</td>
-                                <td>@category.Description</td>
-                                @if(category.Status){
+                                <td>@Brand.ID</td>
+                                <td>@Brand.Name</td>
+                                <td>@Brand.Description</td>
+                                @if(Brand.Status){
                                 <td><span class="badge bg-success">Active</span></td>
                                 }else{
                                 <td><span class="badge bg-danger">Inactive</span></td>
                                 }
+                                <td><img src="/images/@Brand.Img" alt="@Brand.Name" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" /></td>
                                 <td>
-                                    <a href="/Admin/Brand/Edit/@category.ID" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="/Admin/Brand/Delete/@category.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
+                                    <a href="/Admin/Brand/Edit/@Brand.ID" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="/Admin/Brand/Delete/@Brand.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
                                 </td>
                             </tr>
 
