@@ -54,10 +54,10 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return View(selectedbrand);
         }
         [HttpPost]
-        public IActionResult Edit (Brand brand)
+        public IActionResult Edit (Brand brand,IFormFile?Img)
         {
             _context.Brands.Update(brand); 
-            _context.SaveChanges();  
+            _context.SaveChanges();   
             return RedirectToAction(nameof(Index));
         }
         //[HttpGet]
