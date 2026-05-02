@@ -57,7 +57,10 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Edit (Brand brand,IFormFile? image, int id)
         {
-            var selectedbrand = _context.Brands.FirstOrDefault(c => c.ID == id);
+            var selectedbrand = _context.Brands.AsNoTracking().FirstOrDefault(c => c.ID == brand.ID);
+            if (selectedbrand is null)
+                return RedirectToAction("NotFoundPage", "Home");
+
             if (image is not null) {
                 if (image is not null && image.Length > 0)
                 {
@@ -68,6 +71,13 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                     {
                         image.CopyTo(stream);
                     }
+
+                    //Remove old img from wwwroot
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", selectedbrand.Img);
+                    if (System.IO.File.Exists(oldPath))
+                        System.IO.File.Delete(oldPath);
+
+                    //Save New Img
                     brand.Img = fileName;
                 }
             }
