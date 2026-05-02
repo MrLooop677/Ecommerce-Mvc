@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿@* <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -66,4 +66,56 @@
   
 
 </body>
-</html>
+</html> *@
+
+
+@{
+    ViewData["Title"] = "Create Brand";
+}
+
+<div class="container mt-5">
+
+    <div class="mb-4">
+        <h2>Create Brand</h2>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <form method="post" enctype="multipart/form-data" asp-action="Create">
+
+                <div class="mb-3">
+                    <label class="form-label">Brand Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter Brand name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Brand Image</label>
+                    <input type="file" name="image" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">-- Select Status --</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary">Cancel</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

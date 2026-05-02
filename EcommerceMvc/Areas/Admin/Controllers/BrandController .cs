@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EcommerceMvc.Areas.Admin.Controllers
 {
@@ -16,6 +17,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 e.Name,
                 e.Description,
                 e.Status,
+                e.Img
 
             }).AsEnumerable());
         }
@@ -29,12 +31,12 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         public IActionResult Create (Brand brand, IFormFile image)
         {
             if (image is not null && image.Length > 0) {
-
+                //create and set img
                 var fileName = Guid.NewGuid().ToString() +Path.GetExtension(image.FileName);
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot\\images",fileName);
                 using (var stream = System.IO.File.Create(filePath))
                 { 
-                    image.CopyTo(stream);
+                    image.CopyTo(stream);           
                 }
                 brand.Img = fileName;
             }
@@ -53,10 +55,28 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return View(selectedbrand);
         }
         [HttpPost]
-        public IActionResult Edit (Brand brand)
+        public IActionResult Edit (Brand brand,IFormFile? image, int id)
         {
+            var selectedbrand = _context.Brands.FirstOrDefault(c => c.ID == id);
+            if (image is not null) {
+                if (image is not null && image.Length > 0)
+                {
+                    //create and set img
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        image.CopyTo(stream);
+                    }
+                    brand.Img = fileName;
+                }
+            }
+            else
+            {
+                brand.Img = selectedbrand.Img;
+            }
             _context.Brands.Update(brand); 
-            _context.SaveChanges();  
+            _context.SaveChanges();   
             return RedirectToAction(nameof(Index));
         }
         //[HttpGet]
