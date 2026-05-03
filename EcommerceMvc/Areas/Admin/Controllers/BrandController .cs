@@ -41,7 +41,8 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 brand.Img = fileName;
             }
             _context.Brands.Add(brand);
-            _context.SaveChanges();  
+            _context.SaveChanges();
+            Response.Cookies.Append("Notification", "Brand created successfully!");
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
