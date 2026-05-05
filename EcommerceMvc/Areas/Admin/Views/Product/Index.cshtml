@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+            .pagination .page-link {
+                color: #0d6efd;
+                transition: 0.2s;
+            }
+
+                .pagination .page-link:hover {
+                    background-color: #0d6efd;
+                    color: white;
+                }
+
+            .pagination .active .page-link {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+            }
+
+            .table-footer {
+                background: #f8f9fa;
+                border-top: 1px solid #dee2e6;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <div class="display-6 text-success">@TempData["Notification"]</div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Products</h2>
+            <a href="/Admin/Product/Create" class="btn btn-primary">+ Create Product</a>
+        </div>
+        <div>
+
+            <form method="get">
+                <input type="text" name="name" id="name" class="form-control mb-3"
+                       placeholder="Search by product name..."
+                       value="@ViewBag.Name" />
+                <div class="row">
+                    <!-- Price Range -->
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" placeholder="Min Price" name="minPrice" value="@ViewBag.MinPrice">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" placeholder="Max Price" name="maxPrice" value="@ViewBag.MaxPrice">
+                    </div>
+
+                    <!-- Category -->
+                    <div class="col-md-2">
+                        <select name="categoryId" class="form-control">
+                            <option value="">--Select Category--</option>
+                            @if (ViewData["Categories"] is IEnumerable<Category> categories)
+                            {
+                                @foreach (var item in categories)
+                                {
+                                    if (item.ID == ViewBag.CategoryId)
+                                    {
+
+                                                    
+                                        <option selected value="@item.ID">@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.ID">@item.Name</option>
+
+                                    }
+                                }
+                            }
+
+                        </select>
+                    </div>
+
+                    <!-- Brand -->
+                    <div class="col-md-2">
+                        <select name="brandId" class="form-control">
+                            <option value="">--Select Brand--</option>
+
+                            @foreach (var item in ViewBag.Brands)
+                            {
+                                if (item.ID == ViewBag.BrandId)
+                                {
+                                    <option selected value="@item.ID">@item.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.ID">@item.Name</option>
+
+                                }
+                            }
+
+                        </select>
+                    </div>
+
+                    <!-- Hot Product Checkbox -->
+                    <div class="col-md-1">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="isHot" value="true" @(ViewBag.IsHot == true ? "checked" : "")>
+                            <label class="form-check-label">Hot</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-100">Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- Table Card -->
+        <div class="card shadow-sm">
+
+            <div class="card-body p-0">
+                <table class="table table-bordered table-hover text-center align-middle mb-0">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Category Name</th>
+                            <th>Brand Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Img</th>
+                            <th style="width: 200px;">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var Product in Model)
+                        {
+                            <tr>
+                                <td>@Product.ID</td>
+                                <td>@Product.Name</td>
+                                <td>@Product.CategoryName</td>
+                                <td>@Product.BrandName</td>
+                                <td>@Product.Price.ToString("C")</td>
+
+                                @if (Product.Quantity > 100)
+                                {
+                                    <td><span class="badge bg-primary">@Product.Quantity</span></td>
+                                }
+                                else
+                                {
+                                    <td><span class="badge bg-danger">@Product.Quantity</span></td>
+                                }
+
+                                @if (Product.Status)
+                                {
+                                    <td><span class="badge bg-success">Active</span></td>
+                                }
+                                else
+                                {
+                                    <td><span class="badge bg-danger">Inactive</span></td>
+                                }
+
+                                <td>
+                                    <img src="/images/@Product.MainImage"
+                                         alt="@Product.Name"
+                                         class="img-thumbnail"
+                                         style="max-width: 80px;">
+                                </td>
+
+                                <td>
+                                    <a href="/Admin/Product/Edit/@Product.ID" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="/Admin/Product/Delete/@Product.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- 🔥 Pagination INSIDE card (table footer style) -->
+            <div class="card-footer table-footer">
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <!-- Info -->
+                    <small class="text-muted">
+                        Page @ViewBag.currentPage of @ViewBag.totalPage
+                    </small>
+
+                    <!-- Pagination -->
+                    <nav>
+                        <ul class="pagination mb-0">
+
+                            <!-- Previous -->
+                            @if (ViewBag.currentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(ViewBag.currentPage - 1)&name=@ViewBag.Name">«</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">«</span>
+                                </li>
+                            }
+
+                            <!-- Numbers -->
+                            @for (int i = 1; i <= ViewBag.totalPage; i++)
+                            {
+                                if (i == ViewBag.currentPage)
+                                {
+                                    <li class="page-item active ">
+                                        <span class="page-link">@i</span>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=@i&name=@ViewBag.Name">@i</a>
+                                    </li>
+                                }
+                            }
+
+                            <!-- Next -->
+                            @if (ViewBag.currentPage < ViewBag.totalPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(ViewBag.currentPage + 1)&name=@ViewBag.Name">»</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">»</span>
+                                </li>
+                            }
+
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const deleteButtons = document.querySelectorAll(".btn-delete");
+
+                deleteButtons.forEach(button => {
+                    button.addEventListener("click", function (e) {
+                        e.preventDefault();
+
+                        const url = this.getAttribute("href");
+
+                        Swal.fire({
+                            title: "Are you sure?",
+                            text: "This action cannot be undone!",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#d33",
+                            cancelButtonColor: "#3085d6",
+                            confirmButtonText: "Yes, delete it!"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = url;
+                            }
+                        });
+                    });
+                });
+            });
+
+         
+    </script>
+
+    @section Scripts {
+        <partial name="_NotificationPartial">
+        }
+
+    </body>
+</html>

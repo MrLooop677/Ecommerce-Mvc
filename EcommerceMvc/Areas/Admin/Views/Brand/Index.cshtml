@@ -14,7 +14,7 @@
 <body>
 
     <div class="container mt-5">
-        <div class="display-5">@Context.Request.Cookies["Notification"]</div>
+        <div class="display-5">@TempData["Notification"]</div>
 
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -103,6 +103,9 @@
                 });
             });
     </script>
+    @section Scripts {
 
+        <partial name="_NotificationPartial">
+        }
 </body>
 </html>
