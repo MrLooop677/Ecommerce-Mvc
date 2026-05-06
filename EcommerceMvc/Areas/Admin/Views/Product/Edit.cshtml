@@ -1,4 +1,5 @@
-﻿@model Product
+﻿@using EcommerceMvc.ViewModel
+@model ProductVM
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,29 +27,89 @@
                 <form method="post" enctype="multipart/form-data">
 
                     <!-- Hidden ID -->
-                    <input type="hidden" value="@Model.ID" name="id">
+                    <input type="hidden" value="@Model.Product!.ID" name="id">
 
                     <!-- Name -->
                     <div class="mb-3">
                         <label class="form-label">Brand Name</label>
-                        <input type="text" class="form-control" value="@Model.Name" name="name">
+                        <input type="text" class="form-control" value="@Model.Product.Name" name="name">
                     </div>
                     <div class="mb-3">
                         <label for="Img" class="form-label">Img</label>
-                        <input value="@Model.MainImage" type="file" class="form-control" name="image" accept="image/*" onchange="previewImage(event)">
+                        <input value="@Model.Product.MainImage" type="file" class="form-control" name="image" accept="image/*" onchange="previewImage(event)">
                     </div>
 
                     <div class="mb-3">
                         <img id="preview"
-                             src="~/images/@Model.MainImage"
+                             src="~/images/@Model.Product.MainImage"
                              alt="Current Image"
                              style="max-width: 200px; border:1px solid #ccc; padding:5px; border-radius:10px;" />
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="text" name="Price" class="form-control" value="@Model.Product.Price"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">DisCount</label>
+                        <input type="text" name="Discount" class="form-control" value="@Model.Product.Discount"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="text" name="Quantity" class="form-control" value="@Model.Product.Quantity"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Categories</label>
+                        <select name="categoryId" class="form-control">
+                            <option value="">-- Select Category --</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                if (category.ID == Model.Product.CategoryId)
+                                {
+                                    <option value="@category.ID" selected>@category.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@category.ID">@category.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Brands</label>
+                        <select name="brandId" class="form-control">
+                            <option value="">-- Select Brand --</option>
+                            @foreach (var brand in Model.Brands)
+                            {
+                                if (brand.ID == Model.Product.BrandId)
+                                {
+                                    <option value="@brand.ID" selected>@brand.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@brand.ID">@brand.Name</option>
+                                }
+                            }
+                        </select>
+                    </div> 
+
+                    <div class="mb-3">
+                        <label class="form-label">Product Sub Images</label>
+                        <input type="file" name="subImages" class="form-control" multiple>
+                    </div>
+                  <div class="d-flex flex-row align-items-center">
+                        @foreach (var subImage in Model.Product.ProductSubImages)
+                        {
+                            <div class="mb-3">
+                                <img src="~/images/product_images/@subImage.Img" alt="Sub Image" style="max-width: 150px; border:1px solid #ccc; padding:5px; border-radius:10px; margin-right:10px;" />
+                            </div>
+                        }
+                  </div>
                     <!-- Description -->
                     <div class="mb-3">
                         <label class="form-label">Description</label>
-                        <textarea class="form-control" rows="4" name="description">@Model.Description</textarea>
+                        <textarea class="form-control" rows="4" name="description">@Model.Product.Description</textarea>
                     </div>
 
                     <!-- Status -->
@@ -56,8 +117,8 @@
                         <label class="form-label">Status</label>
                         <select class="form-control" name="status">
                             <option value="">-- Select Status --</option>
-                            <option value="true" selected="@(Model.Status ? "selected" : null)">Active</option>
-                            <option value="false" selected="@(!Model.Status ? "selected" : null)">Inactive</option>
+                            <option value="true" selected="@(Model.Product.Status ? "selected" : null)">Active</option>
+                            <option value="false" selected="@(!Model.Product.Status ? "selected" : null)">Inactive</option>
                         </select>
                     </div>
 

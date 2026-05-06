@@ -127,13 +127,20 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var selectedproduct = _context.Products.FirstOrDefault(c => c.ID == id);
+            var selectedproduct = _context.Products.Include(p=>p.ProductSubImages).Include(p=>p.ProductColors).FirstOrDefault(c => c.ID == id);
             if (selectedproduct == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
             }
+            var categories = _context.Categories.AsNoTracking();
+            var brands = _context.Brands.AsNoTracking();
 
-            return View(selectedproduct);
+            return View(new ProductVM
+            {
+                Categories = categories.AsEnumerable(),
+                Brands = brands.AsEnumerable(),
+                Product=selectedproduct
+            });
         }
         [HttpPost]
         public IActionResult Edit(Product product, IFormFile? image, int id)
