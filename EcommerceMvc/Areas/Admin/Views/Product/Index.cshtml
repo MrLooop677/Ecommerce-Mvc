@@ -33,7 +33,7 @@
 <body>
 
     <div class="container mt-5">
-        <div class="display-6 text-success">@TempData["Notification"]</div>
+        <div class="display-6 text-success">@TempData["success-notification"]</div>
 
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -104,8 +104,8 @@
                     <!-- Hot Product Checkbox -->
                     <div class="col-md-1">
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="isHot" value="true" @(ViewBag.IsHot == true ? "checked" : "")>
-                            <label class="form-check-label">Hot</label>
+                            <input type="checkbox" class="form-check-input" name="lessQuantity" value="true" @(ViewBag.lessQuantity == true ? "checked" : "")>
+                            <label class="form-check-label">Less Quantity</label>
                         </div>
                     </div>
                 </div>
@@ -199,7 +199,7 @@
                             @if (ViewBag.currentPage > 1)
                             {
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=@(ViewBag.currentPage - 1)&name=@ViewBag.Name">«</a>
+                                    <a class="page-link" href="?page=@(ViewBag.currentPage - 1)&name=@ViewBag.Name&minPrice=@ViewBag.minPrice&maxPrice=@ViewBag.maxPrice&categoryId=@ViewBag.categoryId&brandId=@ViewBag.brandId&lessQuantity=@ViewBag.lessQuantity">«</a>
                                 </li>
                             }
                             else
@@ -221,7 +221,7 @@
                                 else
                                 {
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=@i&name=@ViewBag.Name">@i</a>
+                                        <a class="page-link" href="?page=@i&name=@ViewBag.Name&minPrice=@ViewBag.minPrice&maxPrice=@ViewBag.maxPrice&categoryId=@ViewBag.categoryId&brandId=@ViewBag.brandId&lessQuantity=@ViewBag.lessQuantity">@i</a>
                                     </li>
                                 }
                             }
@@ -230,7 +230,7 @@
                             @if (ViewBag.currentPage < ViewBag.totalPage)
                             {
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=@(ViewBag.currentPage + 1)&name=@ViewBag.Name">»</a>
+                                    <a class="page-link" href="?page=@(ViewBag.CurrentPage + 1)&name=@ViewBag.Name&minPrice=@ViewBag.minPrice&maxPrice=@ViewBag.maxPrice&categoryId=@ViewBag.categoryId&brandId=@ViewBag.brandId&lessQuantity=@ViewBag.lessQuantity">»</a>
                                 </li>
                             }
                             else
@@ -279,9 +279,9 @@
          
     </script>
 
-    @section Scripts {
+    @* @section Scripts {
         <partial name="_NotificationPartial">
-        }
-
+        } *@
+        
     </body>
 </html>

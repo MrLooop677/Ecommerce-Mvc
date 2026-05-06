@@ -43,10 +43,11 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 Products = Products.Where(p => p.BrandId == FilterProductVM.brandId);
                 ViewBag.BrandId = FilterProductVM.brandId;
             }
-            if (FilterProductVM.isHot)
+           
+            if (FilterProductVM.lessQuantity)
             {
-                Products = Products.Where(p => p.Discount > discount);
-                ViewBag.IsHot = FilterProductVM.isHot;
+                Products = Products.OrderBy(p => p.Quantity);
+                ViewBag.LessQuantity = FilterProductVM.lessQuantity;
             }
 
             var categories = _context.Categories.AsNoTracking();
@@ -55,7 +56,9 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             ViewBag.Brands = brands.AsEnumerable();
 
             //pagination
-            ViewBag.totalPage = Math.Ceiling(Products.Count() / pageSize);
+            var totalCount = Products.Count();
+
+            ViewBag.totalPage = Math.Ceiling(totalCount / pageSize);
             ViewBag.currentPage = page;
             Products = Products.Skip((page - 1) * (int)pageSize).Take((int)pageSize);
             return View(Products.Select(e => new
@@ -86,42 +89,66 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             });
         }
         [HttpPost]
-        public IActionResult Create(Product product, IFormFile image, List<IFormFile>? subImages)
+        public IActionResult Create(Product product, IFormFile image, List<IFormFile>? subImages,string [] colors)
         {
-            if (image is not null && image.Length > 0)
-            {
-                //create and set img
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
-                using (var stream = System.IO.File.Create(filePath))
+            var transaction = _context.Database.BeginTransaction();
+            try {
+                if (image is not null && image.Length > 0)
                 {
-                    image.CopyTo(stream);
-                }
-                product.MainImage = fileName;
-            }
-            var productCreated = _context.Products.Add(product);
-            _context.SaveChanges();
-            if (subImages is not null && subImages.Count > 0)
-            {
-
-                foreach (var img in subImages)
-                {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\product_images", fileName);
+                    //create and set img
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
                     using (var stream = System.IO.File.Create(filePath))
                     {
-                        img.CopyTo(stream);
+                        image.CopyTo(stream);
                     }
-                    _context.ProductSubImages.Add(new ProductSubImg
-                    {
-                        Img = fileName,
-                        ProductId = productCreated.Entity.ID
-                    });
+                    product.MainImage = fileName;
                 }
+                var productCreated = _context.Products.Add(product);
                 _context.SaveChanges();
+                if (subImages is not null && subImages.Count > 0)
+                {
+
+                    foreach (var img in subImages)
+                    {
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\product_images", fileName);
+                        using (var stream = System.IO.File.Create(filePath))
+                        {
+                            img.CopyTo(stream);
+                        }
+                        _context.ProductSubImages.Add(new ProductSubImg
+                        {
+                            Img = fileName,
+                            ProductId = productCreated.Entity.ID
+                        });
+                    }
+                    _context.SaveChanges();
+                }
+                if (colors.Any())
+                {
+                    var ProductColors = _context.ProductColors;
+                    foreach (var color in colors)
+                    {
+
+                        ProductColors.Add(new ProductColor
+                        {
+                            Color = color,
+                            ProductId = productCreated.Entity.ID,
+                        });
+                    }
+                    _context.SaveChanges();
+                    transaction.Commit();
+
+                }
+                //Response.Cookies.Append("success-notification", "Product created successfully!");
+                TempData["success-notification"] = "Product created successfully!";
+            } catch(Exception ex) {
+                TempData["error-notification"] = "Error occurred while creating product!";
+                transaction.Rollback();
+
             }
-            //Response.Cookies.Append("Notification", "Product created successfully!");
-            TempData["Notification"] = "Product created successfully!";
+
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -176,7 +203,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             }
             _context.Products.Update(product);
             _context.SaveChanges();
-            TempData["Notification"] = "Product updated successfully!";
+            TempData["success-notification"] = "Product updated successfully!";
 
             return RedirectToAction(nameof(Index));
         }
@@ -194,7 +221,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             _context.Products.Remove(deletedItem);
 
             _context.SaveChanges();
-            TempData["Notification"] = "Product deleted successfully!";
+            TempData["success-notification"] = "Product deleted successfully!";
 
             return RedirectToAction(nameof(Index));
         }

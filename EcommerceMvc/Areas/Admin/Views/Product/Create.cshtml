@@ -34,15 +34,26 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Price</label>
-                    <input type="text" name="Price" class="form-control" ></input>
+                    <input type="text" name="Price" class="form-control"/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">DisCount</label>
-                    <input type="text" name="Discount" class="form-control"></input>
+                    <input type="text" name="Discount" class="form-control"/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Quantity</label>
-                    <input type="text" name="Quantity" class="form-control" ></input>
+                    <input type="text" name="Quantity" class="form-control"/>
+                </div>
+                <div class="mb-3">
+                    <label for="Color" class="form-label">Color</label>
+
+                    <div id="colorContainer">
+                        <div class="mb-2 d-flex align-item-center">
+                            <input type="color" class="form-control form-control-color" name="Colors">
+                        </div>
+                    </div>
+
+                    <button type="button" id="addButtonColor" class="btn btn-outline-primary">+ Add New Color</button>
                 </div>
 
                 <div class="mb-3">
@@ -86,3 +97,25 @@
     </div>
 
 </div>
+<script>
+    const conateiner = document.getElementById('colorContainer');
+    const addBtn = document.getElementById('addButtonColor');
+
+    addBtn.addEventListener('click', () => {
+        var colorRow = document.createElement('div');
+
+        colorRow.className = 'mb-2 d-flex align-item-center'
+        colorRow.innerHTML = `
+                <input type="color" class="form-control form-control-color" name="Colors">
+                <button type="Button" class="btn btn-danger btn-sm removeColor">X</button>
+            `;
+
+        conateiner.appendChild(colorRow);
+    });
+
+    conateiner.addEventListener('click', (e) => {
+        if (e.target.classList.contains('removeColor')) {
+            e.target.parentElement.remove();
+        }
+    })
+</script>

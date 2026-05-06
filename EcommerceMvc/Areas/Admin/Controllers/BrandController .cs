@@ -42,8 +42,8 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             }
             _context.Brands.Add(brand);
             _context.SaveChanges();
-            //Response.Cookies.Append("Notification", "Brand created successfully!");
-            TempData["Notification"] = "Brand created successfully!";
+            //Response.Cookies.Append("success-notification", "Brand created successfully!");
+            TempData["success-notification"] = "Brand created successfully!";
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -89,7 +89,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             }
             _context.Brands.Update(brand); 
             _context.SaveChanges();
-            TempData["Notification"] = "Brand updated successfully!";
+            TempData["success-notification"] = "Brand updated successfully!";
 
             return RedirectToAction(nameof(Index));
         }
@@ -106,7 +106,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             _context.Brands.Remove(deletedItem);
             
             _context.SaveChanges();
-            TempData["Notification"] = "Brand deleted successfully!";
+            TempData["success-notification"] = "Brand deleted successfully!";
 
             return RedirectToAction(nameof(Index));
         }
