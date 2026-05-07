@@ -1,6 +1,7 @@
 ﻿using EcommerceMvc.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace EcommerceMvc.Areas.Admin.Controllers
@@ -43,7 +44,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 Products = Products.Where(p => p.BrandId == FilterProductVM.brandId);
                 ViewBag.BrandId = FilterProductVM.brandId;
             }
-           
+
             if (FilterProductVM.lessQuantity)
             {
                 Products = Products.OrderBy(p => p.Quantity);
@@ -89,10 +90,11 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             });
         }
         [HttpPost]
-        public IActionResult Create(Product product, IFormFile image, List<IFormFile>? subImages,string [] colors)
+        public IActionResult Create(Product product, IFormFile image, List<IFormFile>? subImages, string[] colors)
         {
             var transaction = _context.Database.BeginTransaction();
-            try {
+            try
+            {
                 if (image is not null && image.Length > 0)
                 {
                     //create and set img
@@ -138,12 +140,14 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                         });
                     }
                     _context.SaveChanges();
-                    transaction.Commit();
 
                 }
                 //Response.Cookies.Append("success-notification", "Product created successfully!");
                 TempData["success-notification"] = "Product created successfully!";
-            } catch(Exception ex) {
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
                 TempData["error-notification"] = "Error occurred while creating product!";
                 transaction.Rollback();
 
@@ -154,7 +158,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var selectedproduct = _context.Products.Include(p=>p.ProductSubImages).Include(p=>p.ProductColors).FirstOrDefault(c => c.ID == id);
+            var selectedproduct = _context.Products.Include(p => p.ProductSubImages).Include(p => p.ProductColors).FirstOrDefault(c => c.ID == id);
             if (selectedproduct == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
@@ -166,13 +170,13 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             {
                 Categories = categories.AsEnumerable(),
                 Brands = brands.AsEnumerable(),
-                Product=selectedproduct
+                Product = selectedproduct
             });
         }
         [HttpPost]
-        public IActionResult Edit(Product product, IFormFile? image, int id)
+        public IActionResult Edit(Product product, IFormFile? image, int id, string[] colors, List<IFormFile>? SubImgs)
         {
-            var selectedproduct = _context.Products.AsNoTracking().FirstOrDefault(c => c.ID == product.ID);
+                var selectedproduct = _context.Products.Include(p => p.ProductSubImages).Include(p => p.ProductColors).FirstOrDefault(c => c.ID == product.ID);
             if (selectedproduct is null)
                 return RedirectToAction("NotFoundPage", "Home");
 
@@ -198,26 +202,104 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 }
             }
             else
-            {
+             {
                 product.MainImage = selectedproduct.MainImage;
             }
-            _context.Products.Update(product);
+
+            if (SubImgs is not null && SubImgs.Count > 0)
+            {
+
+                foreach (var img in SubImgs)
+                {
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\product_images", fileName);
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        img.CopyTo(stream);
+                    }
+                    _context.ProductSubImages.Add(new ProductSubImg
+                    {
+                        Img = fileName,
+                        ProductId = selectedproduct.ID
+                    });
+                }
+            }
+
+            if (colors.Any())
+            {
+                var ProductColors = _context.ProductColors;
+                foreach (var item in selectedproduct.ProductColors)
+                {
+
+                    _context.ProductColors.Remove(item);
+                }
+
+                foreach (var color in colors)
+                {
+
+                    ProductColors.Add(new ProductColor
+                    {
+                        Color = color,
+                        ProductId = selectedproduct.ID,
+                    });
+                }
+
+            }
+
+            // best bractes for update product
+            //_context.Products.Update(product);
+            selectedproduct.Name = product.Name;
+            selectedproduct.Description = product.Description;
+            selectedproduct.Price = product.Price;
+            selectedproduct.Quantity = product.Quantity;
+            selectedproduct.BrandId = product.BrandId;
+            selectedproduct.CategoryId = product.CategoryId;
+            selectedproduct.Discount = product.Discount;
+            selectedproduct.Status = product.Status;
             _context.SaveChanges();
             TempData["success-notification"] = "Product updated successfully!";
 
             return RedirectToAction(nameof(Index));
         }
-        //[HttpGet]
+        public IActionResult DeleteSubImg(int productId, string img)
+        {
+            var productSubImg = _context.ProductSubImages.FirstOrDefault(e => e.Img == img && e.ProductId == productId);
+            if (productSubImg != null)
+            {
+                _context.ProductSubImages.Remove(productSubImg);
+                //Remove old subimages from wwwroot\\product_images
+                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\product_images", productSubImg.Img);
+                if (System.IO.File.Exists(oldPath))
+                    System.IO.File.Delete(oldPath);
 
+            }
+            else
+                return RedirectToAction("NotFoundPage", "Home");
+
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Edit), new { id = productId });
+        }
         public IActionResult Delete(int id)
         {
-            var deletedItem = _context.Products.FirstOrDefault(c => c.ID == id);
+            var deletedItem = _context.Products.Include(p=>p.ProductColors).Include(p=>p.ProductSubImages).FirstOrDefault(c => c.ID == id);
             if (deletedItem == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
             }
 
+            var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", deletedItem.MainImage);
+            if (System.IO.File.Exists(oldPath))
+                System.IO.File.Delete(oldPath);
+            foreach (var subimg in deletedItem.ProductSubImages) { 
 
+
+            var subimgoldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\product_images", subimg.Img);
+            if (System.IO.File.Exists(subimgoldPath))
+                System.IO.File.Delete(subimgoldPath);
+            }
+
+            _context.ProductSubImages.RemoveRange(deletedItem.ProductSubImages);
+            _context.ProductColors.RemoveRange(deletedItem.ProductColors);
             _context.Products.Remove(deletedItem);
 
             _context.SaveChanges();
