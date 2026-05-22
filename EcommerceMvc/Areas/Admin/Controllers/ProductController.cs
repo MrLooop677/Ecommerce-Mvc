@@ -180,7 +180,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             if (selectedproduct is null)
                 return RedirectToAction("NotFoundPage", "Home");
 
-            if (image is not null)
+             if (image is not null)
             {
                 if (image is not null && image.Length > 0)
                 {
@@ -256,6 +256,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             selectedproduct.CategoryId = product.CategoryId;
             selectedproduct.Discount = product.Discount;
             selectedproduct.Status = product.Status;
+            selectedproduct.MainImage = product.MainImage;
             _context.SaveChanges();
             TempData["success-notification"] = "Product updated successfully!";
 
