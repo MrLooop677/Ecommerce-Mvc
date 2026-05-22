@@ -24,7 +24,7 @@
             <div class="card-body">
 
                 <form method="post">
-
+                    <div class="text-danger" asp-validation-summary="All"></div>
                     <!-- Hidden ID -->
                     <input type="hidden" value="@Model.ID" name="id">
 
@@ -32,12 +32,14 @@
                     <div class="mb-3">
                         <label class="form-label">Category Name</label>
                         <input type="text" class="form-control" value="@Model.Name" name="name">
+                        <span class="text-danger" asp-validation-for="@Model.Name"></span>
                     </div>
 
                     <!-- Description -->
                     <div class="mb-3">
                         <label class="form-label">Description</label>
                         <textarea class="form-control" rows="4" name="description">@Model.Description</textarea>
+                        <span class="text-danger" asp-validation-for="@Model.Description"></span>
                     </div>
 
                     <!-- Status -->
@@ -49,6 +51,7 @@
                             <option value="false" selected="@(!Model.Status ? "selected" : null)">Inactive</option>
                         </select>
                     </div>
+                    <span class="text-danger" asp-validation-for="@Model.Status"></span>
 
                     <!-- Buttons -->
                     <div class="d-flex justify-content-between">

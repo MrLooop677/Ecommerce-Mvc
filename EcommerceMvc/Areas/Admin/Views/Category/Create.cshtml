@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@model Category
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,29 +23,33 @@
         <div class="card">
             <div class="card-body">
 
-                <form method="post">
-
+                <form method="post"> 
+                    <div class="text-danger" asp-validation-summary="All"></div>
                     <!-- Name -->
                     <div class="mb-3">
                         <label class="form-label">Category Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter category name">
+                        <input type="text"value="@Model.Name" name="name" class="form-control" placeholder="Enter category name">
+                        <span class="text-danger" asp-validation-for="@Model.Name"></span>
                     </div>
 
                     <!-- Description -->
                     <div class="mb-3">
                         <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Enter description"></textarea>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Enter description">@Model.Description</textarea>
                     </div>
+                    <span class="text-danger" asp-validation-for="@Model.Description"></span>
 
                     <!-- Status -->
                     <div class="mb-3">
                         <label class="form-label">Status</label>
                         <select name="status" class="form-control">
                             <option value="">-- Select Status --</option>
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
+                            <option value="true" selected="@Model.Status">Active</option>
+                            <option value="false" selected="@(Model.Status == false)">Inactive</option>
                         </select>
                     </div>
+                    <span class="text-danger" asp-validation-for="@Model.Status"></span>
+
 
                     <!-- Buttons -->
                     <div class="d-flex justify-content-between">
