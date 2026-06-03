@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EcommerceMvc.ViewModel;
+using Mapster;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace EcommerceMvc.Areas.Admin.Controllers
@@ -8,11 +11,12 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
     public class BrandController : Controller
     {
-        ApplicationDbContext _context = new ();
+        ApplicationDbContext _context = new();
         public IActionResult Index()
         {
             var Brands = _context.Brands.AsQueryable().AsNoTracking();
-            return View(Brands.Select(e => new { 
+            return View(Brands.Select(e => new
+            {
                 e.ID,
                 e.Name,
                 e.Description,
@@ -22,21 +26,33 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             }).AsEnumerable());
         }
         [HttpGet]
-        public IActionResult Create ()
+        public IActionResult Create()
         {
-       
+
             return View();
         }
         [HttpPost]
-        public IActionResult Create (Brand brand, IFormFile image)
+        public IActionResult Create(CreateBrandVM brandVM)
         {
-            if (image is not null && image.Length > 0) {
+            if (!ModelState.IsValid)
+                return View(brandVM);
+
+            //Brand brand = new()
+            //{
+            //    Name = brandVM.Name,
+            //    Description = brandVM.Description,
+            //    Status = brandVM.Status,
+            //};
+            //using mapster to mapping between createBrandVM and brand
+            Brand brand = brandVM.Adapt<Brand>();
+            if (brandVM.Img is not null && brandVM.Img.Length > 0)
+            {
                 //create and set img
-                var fileName = Guid.NewGuid().ToString() +Path.GetExtension(image.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot\\images",fileName);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(brandVM.Img.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
                 using (var stream = System.IO.File.Create(filePath))
-                { 
-                    image.CopyTo(stream);           
+                {
+                    brandVM.Img.CopyTo(stream);
                 }
                 brand.Img = fileName;
             }
@@ -47,31 +63,55 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit (int id)
+        public IActionResult Edit(int id)
         {
-            var selectedbrand = _context.Brands.FirstOrDefault(c=>c.ID==id);
-            if (selectedbrand == null) {
+            var selectedbrand = _context.Brands.FirstOrDefault(c => c.ID == id);
+            if (selectedbrand == null)
+            {
                 return RedirectToAction("NotFoundPage", "Home");
             }
-       
-            return View(selectedbrand);
+
+            //return View(new UpdateBrandVM
+            //{
+            //    Id = selectedbrand.ID,
+            //    Name = selectedbrand.Name,
+            //    Description = selectedbrand.Description,
+            //    Status = selectedbrand.Status,
+            //    Img = selectedbrand.Img,
+            //});
+            //using mapster to mapping between selectedbrand and updateBrandVM
+            var updatedBrandVM = selectedbrand.Adapt<UpdateBrandVM>();
+            return View(updatedBrandVM);
+
         }
         [HttpPost]
-        public IActionResult Edit (Brand brand,IFormFile? image, int id)
+        public IActionResult Edit(UpdateBrandVM updateBrandVM)
         {
-            var selectedbrand = _context.Brands.AsNoTracking().FirstOrDefault(c => c.ID == brand.ID);
+            if(!ModelState.IsValid) 
+                return View(updateBrandVM);
+            var selectedbrand = _context.Brands.AsNoTracking().FirstOrDefault(c => c.ID == updateBrandVM.Id);
             if (selectedbrand is null)
                 return RedirectToAction("NotFoundPage", "Home");
-
-            if (image is not null) {
-                if (image is not null && image.Length > 0)
+            //Brand brand = new()
+            //{
+            //    ID = updateBrandVM.Id,
+            //    Name = updateBrandVM.Name,
+            //    Status = updateBrandVM.Status,
+            //    Description = updateBrandVM.Description,
+            //    Img=selectedbrand.Img
+            //};
+            //using mapster to mapping between updateBrandVM and brand
+            Brand brand =updateBrandVM.Adapt<Brand>();
+            if (updateBrandVM.NewImg is not null)
+            {
+                if (updateBrandVM.NewImg is not null && updateBrandVM.NewImg.Length > 0)
                 {
                     //create and set img
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(updateBrandVM.NewImg.FileName);
                     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
                     using (var stream = System.IO.File.Create(filePath))
                     {
-                        image.CopyTo(stream);
+                        updateBrandVM.NewImg.CopyTo(stream); 
                     }
 
                     //Remove old img from wwwroot
@@ -87,24 +127,26 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             {
                 brand.Img = selectedbrand.Img;
             }
-            _context.Brands.Update(brand); 
+
+            _context.Brands.Update(brand);
             _context.SaveChanges();
             TempData["success-notification"] = "Brand updated successfully!";
 
             return RedirectToAction(nameof(Index));
         }
         //[HttpGet]
-       
-        public IActionResult Delete (int id)
+
+        public IActionResult Delete(int id)
         {
-            var deletedItem=_context.Brands.FirstOrDefault(c => c.ID == id);
-            if (deletedItem == null) {
+            var deletedItem = _context.Brands.FirstOrDefault(c => c.ID == id);
+            if (deletedItem == null)
+            {
                 return RedirectToAction("NotFoundPage", "Home");
             }
-           
+
 
             _context.Brands.Remove(deletedItem);
-            
+
             _context.SaveChanges();
             TempData["success-notification"] = "Brand deleted successfully!";
 
