@@ -7,44 +7,47 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
     public class CategoryController : Controller
     {
-        ApplicationDbContext _context = new ();
-        public IActionResult Index()
+        //ApplicationDbContext _context = new ();
+        Repository<Category> _categoryRepository = new();
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var Catagories = _context.Categories.AsQueryable().AsNoTracking();
+            var Catagories = await _categoryRepository.GetAsync(tracked:false,cancellationToken: cancellationToken);
             return View(Catagories.AsEnumerable());
         }
         [HttpGet]
-        public IActionResult Create ()
+        public IActionResult Create()
         {
-       
+
             return View(new Category());
         }
-        [HttpPost]
-        public IActionResult Create (Category category)
+        [HttpPost] 
+        public async Task<IActionResult> Create(Category category, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
 
                 ModelState.AddModelError(string.Empty, "Please fill all required fields correctly.");
 
-            return View(category);
+                return View(category);
             }
-            _context.Categories.Add(category);
-            _context.SaveChanges();  
+
+            await _categoryRepository.AddAsync(category, cancellationToken);
+            await _categoryRepository.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit (int id)
+        public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
         {
-            var selectedCategory = _context.Categories.FirstOrDefault(c=>c.ID==id);
-            if (selectedCategory == null) {
+            var selectedCategory =await _categoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
+            if (selectedCategory == null)
+            {
                 return RedirectToAction("NotFoundPage", "Home");
             }
-       
+              
             return View(selectedCategory);
         }
         [HttpPost]
-        public IActionResult Edit (Category category)
+        public async Task<IActionResult> Edit(Category category,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -52,27 +55,21 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "");
                 return View(category);
             }
-            _context.Categories.Update(category); 
-            _context.SaveChanges();  
+            _categoryRepository.Update(category);
+           await _categoryRepository.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
-        //[HttpGet]
-        //public IActionResult Delete ()
-        //{
-            
-        //    return View();
-        //}
-        public IActionResult Delete (int id)
+        public async Task<IActionResult> Delete(int id,CancellationToken cancellationToken) 
         {
-            var deletedItem=_context.Categories.FirstOrDefault(c => c.ID == id);
-            if (deletedItem == null) {
+            var deletedItem =await _categoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
+            if (deletedItem == null)
+            {
                 return RedirectToAction("NotFoundPage", "Home");
             }
-           
 
-            _context.Categories.Remove(deletedItem);
-            
-            _context.SaveChanges();  
+
+            _categoryRepository.Delete(deletedItem);
+            await _categoryRepository.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
     }
