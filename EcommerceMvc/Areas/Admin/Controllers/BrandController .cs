@@ -11,10 +11,12 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
     public class BrandController : Controller
     {
-        ApplicationDbContext _context = new();
-        public IActionResult Index()
+        //ApplicationDbContext _context = new();
+        Repository<Brand> _brandRepository = new();
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var Brands = _context.Brands.AsQueryable().AsNoTracking();
+            //var Brands = _context.Brands.AsQueryable().AsNoTracking();
+            var Brands =await _brandRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
             return View(Brands.Select(e => new
             {
                 e.ID,
@@ -32,7 +34,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Create(CreateBrandVM brandVM)
+        public async Task<IActionResult> Create(CreateBrandVM brandVM,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return View(brandVM);
@@ -56,16 +58,20 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 }
                 brand.Img = fileName;
             }
-            _context.Brands.Add(brand);
-            _context.SaveChanges();
+            //_context.Brands.Add(brand);
+            //_context.SaveChanges();
+            await _brandRepository.AddAsync(brand, cancellationToken);
+            await _brandRepository.CommitAsync(cancellationToken);
             //Response.Cookies.Append("success-notification", "Brand created successfully!");
             TempData["success-notification"] = "Brand created successfully!";
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            var selectedbrand = _context.Brands.FirstOrDefault(c => c.ID == id);
+            //var selectedbrand = _context.Brands.FirstOrDefault(c => c.ID == id);
+            var selectedbrand = await _brandRepository.GetOneAsync(c => c.ID == id, cancellationToken: cancellationToken);
+
             if (selectedbrand == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
@@ -85,11 +91,12 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
         }
         [HttpPost]
-        public IActionResult Edit(UpdateBrandVM updateBrandVM)
+        public async Task<IActionResult> Edit(UpdateBrandVM updateBrandVM,CancellationToken cancellationToken)
         {
             if(!ModelState.IsValid) 
                 return View(updateBrandVM);
-            var selectedbrand = _context.Brands.AsNoTracking().FirstOrDefault(c => c.ID == updateBrandVM.Id);
+            //var selectedbrand = _context.Brands.AsNoTracking().FirstOrDefault(c => c.ID == updateBrandVM.Id);
+            var selectedbrand =await _brandRepository.GetOneAsync(c => c.ID == updateBrandVM.ID,tracked:false, cancellationToken: cancellationToken);
             if (selectedbrand is null)
                 return RedirectToAction("NotFoundPage", "Home");
             //Brand brand = new()
@@ -128,26 +135,31 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 brand.Img = selectedbrand.Img;
             }
 
-            _context.Brands.Update(brand);
-            _context.SaveChanges();
+            //_context.Brands.Update(brand);
+            //_context.SaveChanges();
+            _brandRepository.Update(brand);
+            await _brandRepository.CommitAsync(cancellationToken);
             TempData["success-notification"] = "Brand updated successfully!";
 
             return RedirectToAction(nameof(Index));
         }
         //[HttpGet]
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var deletedItem = _context.Brands.FirstOrDefault(c => c.ID == id);
+            //var deletedItem = _context.Brands.FirstOrDefault(c => c.ID == id);
+            var deletedItem = await _brandRepository.GetOneAsync(c => c.ID == id);
             if (deletedItem == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
             }
 
 
-            _context.Brands.Remove(deletedItem);
+            //_context.Brands.Remove(deletedItem);
+            _brandRepository.Delete(deletedItem);
 
-            _context.SaveChanges();
+            //_context.SaveChanges();
+            await _brandRepository.CommitAsync();
             TempData["success-notification"] = "Brand deleted successfully!";
 
             return RedirectToAction(nameof(Index));
