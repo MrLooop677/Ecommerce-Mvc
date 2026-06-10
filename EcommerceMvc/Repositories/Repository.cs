@@ -13,9 +13,10 @@ namespace EcommerceMvc.Repositories
            _db= _context.Set<T>();
         }
         //CRUD
-        public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
+        public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _db.AddAsync(entity, cancellationToken);
+          var result =  await _db.AddAsync(entity, cancellationToken);
+            return result.Entity;
         }
         public void Update(T entity)
         {
@@ -25,7 +26,10 @@ namespace EcommerceMvc.Repositories
         {
             _db.Remove(entity);
         }
-
+        public void DeleteRange(IEnumerable<T> entities)
+        {
+            _db.RemoveRange(entities);
+        }
         public async Task<IEnumerable<T>> GetAsync(
             Expression<Func<T, bool>>? expression = null,
             Expression<Func<T, Object>>[]? includes = null,
