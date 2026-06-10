@@ -271,7 +271,6 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             selectedproduct.Discount = product.Discount;
             selectedproduct.Status = product.Status;
             selectedproduct.MainImage = product.MainImage;
-            Console.WriteLine(selectedproduct.MainImage);
             await  _productRepository.CommitAsync(cancellationToken);
             TempData["success-notification"] = "Product updated successfully!";
 
