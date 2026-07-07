@@ -1,9 +1,19 @@
+using EcommerceMvc;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var connectionString =
+        builder.Configuration.GetConnectionString("DefaultConnection")
+      ?? throw new InvalidOperationException("Connection string"
+      + "'DefaultConnection' not found.");
+
+//AppConfiguration.RegisterConfiguration(builder.Services, connectionString);
+builder.Services.RegisterConfiguration( connectionString);
 
 var app = builder.Build();
 

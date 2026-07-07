@@ -9,11 +9,17 @@ namespace EcommerceMvc.Areas.Customer.Controllers
     [Area("Customer")]
     public class HomeController : Controller
     {
+        private ApplicationDbContext _context = new();
+
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index(FilterProductVM FilterProductVM,int page=1)
         {
             const decimal discount = 50;
             const double pageSize= 4.0;
-            var _context = new ApplicationDbContext();
             var products = _context.Products.Include(p => p.Category).AsNoTracking().AsQueryable();
             if (FilterProductVM.name != null)
             {

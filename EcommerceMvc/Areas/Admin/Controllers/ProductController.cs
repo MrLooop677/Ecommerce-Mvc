@@ -10,12 +10,24 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
     public class ProductController : Controller
     {
-        ApplicationDbContext _context = new();
-        ProductRepository _productRepository = new();
-        Repository<Category> _categoryRepository = new();
-        Repository<Brand> _brandRepository = new();
-        Repository<ProductSubImg> _productSubImagesRepository = new();
-        Repository<ProductColor> _productColorsRepository = new();
+        ApplicationDbContext _context;//= new();
+        private readonly IProductRepository _productRepository;//= new();
+        private readonly IRepository<Category> _categoryRepository;// = new();
+        private readonly IRepository<Brand> _brandRepository;//= new();
+        private readonly IRepository<ProductSubImg> _productSubImagesRepository;// = new();
+        private readonly IRepository<ProductColor> _productColorsRepository;//= new();
+
+    
+
+        public ProductController(ApplicationDbContext context, IProductRepository productRepository, IRepository<Category> categoryRepository, IRepository<Brand> brandRepository, IRepository<ProductSubImg> productSubImagesRepository, IRepository<ProductColor> productColorsRepository)
+        {
+            _context = context;
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
+            _brandRepository = brandRepository;
+            _productSubImagesRepository = productSubImagesRepository;
+            _productColorsRepository = productColorsRepository;
+        }
 
         public async Task<IActionResult> Index(FilterProductVM FilterProductVM, CancellationToken cancellationToken, int page = 1)
         {
@@ -247,6 +259,11 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
                     _productColorsRepository.Delete(item);
                 }
+
+                // Persist deletions before adding new color entries to avoid tracking
+                // conflicts where EF is tracking the deleted instances while we add
+                // new instances with the same primary keys.
+                await _productColorsRepository.CommitAsync(cancellationToken);
 
                 foreach (var color in colors)
                 {
