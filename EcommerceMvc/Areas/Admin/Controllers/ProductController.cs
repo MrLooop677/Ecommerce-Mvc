@@ -10,31 +10,23 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
     public class ProductController : Controller
     {
-        ApplicationDbContext _context;//= new();
-        private readonly IProductRepository _productRepository;//= new();
-        private readonly IRepository<Category> _categoryRepository;// = new();
-        private readonly IRepository<Brand> _brandRepository;//= new();
-        private readonly IRepository<ProductSubImg> _productSubImagesRepository;// = new();
-        private readonly IRepository<ProductColor> _productColorsRepository;//= new();
+        //ApplicationDbContext _context;//= new();
+        private readonly IUnitOfWork _unitOfWork;
+
+        public ProductController(  IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
 
     
 
-        public ProductController(ApplicationDbContext context, IProductRepository productRepository, IRepository<Category> categoryRepository, IRepository<Brand> brandRepository, IRepository<ProductSubImg> productSubImagesRepository, IRepository<ProductColor> productColorsRepository)
-        {
-            _context = context;
-            _productRepository = productRepository;
-            _categoryRepository = categoryRepository;
-            _brandRepository = brandRepository;
-            _productSubImagesRepository = productSubImagesRepository;
-            _productColorsRepository = productColorsRepository;
-        }
-
+     
         public async Task<IActionResult> Index(FilterProductVM FilterProductVM, CancellationToken cancellationToken, int page = 1)
         {
             const decimal discount = 50;
             const double pageSize = 5;
             //var Products = _context.Products.AsQueryable().AsNoTracking();
-            var Products = await _productRepository.GetAsync(includes: [p => p.Category, p => p.Brand] , tracked: false, cancellationToken: cancellationToken);
+            var Products = await _unitOfWork.ProductRepository.GetAsync(includes: [p => p.Category, p => p.Brand] , tracked: false, cancellationToken: cancellationToken);
             if (FilterProductVM.name != null)
             {
 
@@ -72,8 +64,8 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
             //var categories = _context.Categories.AsNoTracking();
             //var brands = _context.Brands.AsNoTracking();
-            var categories = await _categoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
-            var brands = await _brandRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            var categories = await _unitOfWork.CategoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            var brands = await _unitOfWork.BrandRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
             ViewData["Categories"] = categories.AsEnumerable();
             ViewBag.Brands = brands.AsEnumerable();
 
@@ -101,8 +93,8 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         public async Task<IActionResult> Create(CancellationToken cancellationToken)
         {
 
-            var categories = await _categoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
-            var brands = await _brandRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            var categories = await _unitOfWork.CategoryRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
+            var brands = await _unitOfWork.BrandRepository.GetAsync(tracked: false, cancellationToken: cancellationToken);
 
             return View(new ProductVM
             {
@@ -113,7 +105,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Product product, IFormFile image, List<IFormFile>? subImages, string[] colors,CancellationToken cancellationToken)
         {
-            var transaction = _context.Database.BeginTransaction();
+            var transaction = _unitOfWork.BeginTransaction();
             try
             {
                 if (image is not null && image.Length > 0)
@@ -129,8 +121,8 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 }
                 //var productCreated = _context.Products.Add(product);
                 //_context.SaveChanges();
-                var productCreated = await _productRepository.AddAsync(product, cancellationToken);
-                await _productRepository.CommitAsync();
+                var productCreated = await _unitOfWork.ProductRepository.AddAsync(product, cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
                 if (subImages is not null && subImages.Count > 0)
                 {
 
@@ -142,27 +134,27 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                         {
                             img.CopyTo(stream);
                         }
-                        await _productSubImagesRepository.AddAsync(new ProductSubImg
+                        await _unitOfWork.ProductSubImgRepository.AddAsync(new ProductSubImg
                         {
                             Img = fileName,
                             ProductId = productCreated.ID
                         }, cancellationToken);
                     }
-                    await _productSubImagesRepository.CommitAsync(cancellationToken);
+                    await _unitOfWork.CommitAsync(cancellationToken);
                 }
                 if (colors.Any())
                 {
-                    var ProductColors = await _productColorsRepository.GetAsync(cancellationToken: cancellationToken);
+                    var ProductColors = await _unitOfWork.ProductColorRepository.GetAsync(cancellationToken: cancellationToken);
                     foreach (var color in colors)
                     {
 
-                        await _productColorsRepository.AddAsync(new ProductColor
+                        await _unitOfWork.ProductColorRepository.AddAsync(new ProductColor
                         {
                             Color = color,
                             ProductId = productCreated.ID,
                         }, cancellationToken);
                     }
-                    await _productColorsRepository.CommitAsync(cancellationToken);
+                    await _unitOfWork.CommitAsync(cancellationToken);
 
                 }
                 //Response.Cookies.Append("success-notification", "Product created successfully!");
@@ -182,13 +174,13 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
             //var selectedproduct = _context.Products.Include(p => p.ProductSubImages).Include(p => p.ProductColors).FirstOrDefault(c => c.ID == id);
-            var selectedproduct =await _productRepository.GetOneAsync(includes: [p => p.ProductSubImages, p => p.ProductColors],expression: p => p.ID == id,cancellationToken: cancellationToken);
+            var selectedproduct =await _unitOfWork.ProductRepository.GetOneAsync(includes: [p => p.ProductSubImages, p => p.ProductColors],expression: p => p.ID == id,cancellationToken: cancellationToken);
             if (selectedproduct == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
             }
-            var categories =await _categoryRepository.GetAsync(cancellationToken: cancellationToken,tracked:false);
-            var brands = await _brandRepository.GetAsync(cancellationToken: cancellationToken,tracked:false);
+            var categories =await _unitOfWork.CategoryRepository.GetAsync(cancellationToken: cancellationToken,tracked:false);
+            var brands = await _unitOfWork.BrandRepository.GetAsync(cancellationToken: cancellationToken,tracked:false);
 
             return View(new ProductVM
             {
@@ -201,7 +193,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
         public async Task<IActionResult> Edit(Product product, IFormFile? image, int id, string[] colors, List<IFormFile>? SubImgs, CancellationToken cancellationToken)
         {
             //var selectedproduct = _context.Products.Include(p => p.ProductSubImages).Include(p => p.ProductColors).FirstOrDefault(c => c.ID == product.ID);
-            var selectedproduct =await _productRepository.GetOneAsync(includes: [p => p.ProductSubImages, p => p.ProductColors],expression: p => p.ID == product.ID,cancellationToken: cancellationToken);
+            var selectedproduct =await _unitOfWork.ProductRepository.GetOneAsync(includes: [p => p.ProductSubImages, p => p.ProductColors],expression: p => p.ID == product.ID,cancellationToken: cancellationToken);
             if (selectedproduct is null)
                 return RedirectToAction("NotFoundPage", "Home");
 
@@ -242,39 +234,39 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                     {
                         img.CopyTo(stream);
                     }
-                    await _productSubImagesRepository.AddAsync(new ProductSubImg
+                    await _unitOfWork.ProductSubImgRepository.AddAsync(new ProductSubImg
                     {
                         Img = fileName,
                         ProductId = selectedproduct.ID
                     }, cancellationToken);
-                    await _productSubImagesRepository.CommitAsync(cancellationToken);
+                    await _unitOfWork.CommitAsync(cancellationToken);
                 }
             }
 
             if (colors.Any())
             {
-                var ProductColors = await _productColorsRepository.GetAsync(cancellationToken: cancellationToken, tracked: false);
+                var ProductColors = await _unitOfWork.ProductColorRepository.GetAsync(cancellationToken: cancellationToken, tracked: false);
                 foreach (var item in selectedproduct.ProductColors)
                 {
 
-                    _productColorsRepository.Delete(item);
+                    _unitOfWork.ProductColorRepository.Delete(item);
                 }
 
                 // Persist deletions before adding new color entries to avoid tracking
                 // conflicts where EF is tracking the deleted instances while we add
                 // new instances with the same primary keys.
-                await _productColorsRepository.CommitAsync(cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
 
                 foreach (var color in colors)
                 {
 
-                    await _productColorsRepository.AddAsync(new ProductColor
+                    await _unitOfWork.ProductColorRepository.AddAsync(new ProductColor
                     {
                         Color = color,
                         ProductId = selectedproduct.ID,
                     }, cancellationToken);
                 }
-                await _productColorsRepository.CommitAsync(cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
             }
 
             // best bractes for update product
@@ -288,17 +280,17 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             selectedproduct.Discount = product.Discount;
             selectedproduct.Status = product.Status;
             selectedproduct.MainImage = product.MainImage;
-            await  _productRepository.CommitAsync(cancellationToken);
+            await  _unitOfWork.CommitAsync(cancellationToken);
             TempData["success-notification"] = "Product updated successfully!";
 
             return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> DeleteSubImg(int productId, string img, CancellationToken cancellationToken)
         {
-            var productSubImg = await _productSubImagesRepository.GetOneAsync(expression: e => e.Img == img && e.ProductId == productId, cancellationToken: cancellationToken);
+            var productSubImg = await _unitOfWork.ProductSubImgRepository.GetOneAsync(expression: e => e.Img == img && e.ProductId == productId, cancellationToken: cancellationToken);
             if (productSubImg != null)
             {
-                 _productSubImagesRepository.Delete(productSubImg);
+                 _unitOfWork.ProductSubImgRepository.Delete(productSubImg);
                 //Remove old subimages from wwwroot\\product_images
                 var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\product_images", productSubImg.Img);
                 if (System.IO.File.Exists(oldPath))
@@ -308,12 +300,12 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             else
                 return RedirectToAction("NotFoundPage", "Home");
 
-            await _productSubImagesRepository.CommitAsync(cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Edit), new { id = productId });
         }
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var deletedItem = await _productRepository.GetOneAsync(expression: c => c.ID == id, cancellationToken: cancellationToken);
+            var deletedItem = await _unitOfWork.ProductRepository.GetOneAsync(expression: c => c.ID == id, cancellationToken: cancellationToken);
             if (deletedItem == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
@@ -332,15 +324,15 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             }
 
             //_context.ProductSubImages.RemoveRange(deletedItem.ProductSubImages);
-            _productSubImagesRepository.DeleteRange(deletedItem.ProductSubImages);
+            _unitOfWork.ProductSubImgRepository.DeleteRange(deletedItem.ProductSubImages);
 
             //_context.ProductColors.RemoveRange(deletedItem.ProductColors);
-            _productColorsRepository.DeleteRange(deletedItem.ProductColors);
+            _unitOfWork.ProductColorRepository.DeleteRange(deletedItem.ProductColors);
             //_context.Products.Remove(deletedItem);
-            _productRepository.Delete(deletedItem);
+            _unitOfWork.ProductRepository.Delete(deletedItem);
 
             //_context.SaveChanges();
-           await _productRepository.CommitAsync(cancellationToken);
+           await _unitOfWork.CommitAsync(cancellationToken);
             TempData["success-notification"] = "Product deleted successfully!";
 
             return RedirectToAction(nameof(Index));

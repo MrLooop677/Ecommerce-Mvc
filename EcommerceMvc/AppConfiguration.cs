@@ -22,6 +22,7 @@ namespace EcommerceMvc
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IRepository<ProductSubImg>, Repository<ProductSubImg>>();
             services.AddScoped<IRepository<ProductColor>, Repository<ProductColor>>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
     }
 }

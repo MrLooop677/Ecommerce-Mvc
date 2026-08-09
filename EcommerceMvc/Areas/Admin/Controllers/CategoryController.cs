@@ -9,14 +9,15 @@ namespace EcommerceMvc.Areas.Admin.Controllers
     {
         //ApplicationDbContext _context = new ();
         //Repository<Category> _categoryRepository = new();
-        private readonly IRepository<Category> _categoryRepository;//=new Repository<Category>();
-        public CategoryController(IRepository<Category> categoryRepository)
+        //private readonly IRepository<Category> _categoryRepository;//=new Repository<Category>();
+        private readonly  IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _categoryRepository = categoryRepository;
+            _unitOfWork = unitOfWork;
         }
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var Catagories = await _categoryRepository.GetAsync(tracked:false,cancellationToken: cancellationToken);
+            var Catagories = await _unitOfWork.CategoryRepository.GetAsync(tracked:false,cancellationToken: cancellationToken);
             return View(Catagories.AsEnumerable());
         }
         [HttpGet]
@@ -36,14 +37,14 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 return View(category);
             }
 
-            await _categoryRepository.AddAsync(category, cancellationToken);
-            await _categoryRepository.CommitAsync(cancellationToken);
+            await _unitOfWork.CategoryRepository.AddAsync(category, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
         public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
         {
-            var selectedCategory =await _categoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
+            var selectedCategory =await _unitOfWork.CategoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
             if (selectedCategory == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
@@ -60,21 +61,21 @@ namespace EcommerceMvc.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "");
                 return View(category);
             }
-            _categoryRepository.Update(category);
-           await _categoryRepository.CommitAsync(cancellationToken);
+            _unitOfWork.CategoryRepository.Update(category);
+           await _unitOfWork.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> Delete(int id,CancellationToken cancellationToken) 
         {
-            var deletedItem =await _categoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
+            var deletedItem =await _unitOfWork.CategoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
             if (deletedItem == null)
             {
                 return RedirectToAction("NotFoundPage", "Home");
             }
 
 
-            _categoryRepository.Delete(deletedItem);
-            await _categoryRepository.CommitAsync(cancellationToken);
+            _unitOfWork.CategoryRepository.Delete(deletedItem);
+            await _unitOfWork.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
     }
