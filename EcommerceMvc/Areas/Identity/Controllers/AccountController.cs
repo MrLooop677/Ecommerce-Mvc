@@ -23,14 +23,16 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-          var result=  await _userManager.CreateAsync(new() {
+            var result = await _userManager.CreateAsync(new()
+            {
                 Email = registerVM.Email,
                 UserName = registerVM.UserName,
                 FirstName = registerVM.FirstName,
                 LastName = registerVM.LastName
-            },registerVM.Password);
+            }, registerVM.Password);
 
-            if (!result.Succeeded) {
+            if (!result.Succeeded)
+            {
                 foreach (var item in result.Errors)
                 {
                     ModelState.AddModelError("", item.Code);
@@ -40,6 +42,10 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             }
             return RedirectToAction("Login");
 
+        }
+        public IActionResult Login()
+        {
+            return View();
         }
     }
 }
