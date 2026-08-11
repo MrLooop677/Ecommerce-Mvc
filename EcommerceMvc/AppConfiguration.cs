@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceMvc
 {
@@ -15,7 +16,14 @@ namespace EcommerceMvc
                 //options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
                 options.UseSqlServer(connectionString);
             });
-
+            services.AddIdentity<ApplicationUser,IdentityRole>(
+                option => { 
+                option.User.RequireUniqueEmail = true;
+                    option.Password.RequiredLength = 6;
+                    option.Password.RequireNonAlphanumeric = false;
+                }
+                )
+                .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddScoped<IRepository<Category>, Repository<Category>>();
             services.AddScoped<IRepository<Brand>, Repository<Brand>>();
             services.AddScoped<IRepository<Product>, Repository<Product>>();
