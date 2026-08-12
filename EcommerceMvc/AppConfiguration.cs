@@ -21,6 +21,7 @@ namespace EcommerceMvc
                 option.User.RequireUniqueEmail = true;
                     option.Password.RequiredLength = 6;
                     option.Password.RequireNonAlphanumeric = false;
+                    option.Lockout.MaxFailedAccessAttempts = 3;
                 }
                 )
                 .AddEntityFrameworkStores<ApplicationDbContext>();

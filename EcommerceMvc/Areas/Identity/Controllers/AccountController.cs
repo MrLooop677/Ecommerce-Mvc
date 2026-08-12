@@ -8,10 +8,12 @@ namespace EcommerceMvc.Areas.Identity.Controllers
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager)
+        public AccountController(UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         public IActionResult Register()
         {
@@ -47,5 +49,28 @@ namespace EcommerceMvc.Areas.Identity.Controllers
         {
             return View();
         }
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginVM loginVM)
+        {
+            if (!ModelState.IsValid)
+                return View();
+            var user =await _userManager.FindByNameAsync(loginVM.userNameOREmail) ??await _userManager.FindByEmailAsync(loginVM.userNameOREmail);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "UserName/Email or Password is incorrect");
+                return View(loginVM);
+            }
+            var result = await _signInManager.PasswordSignInAsync(user,loginVM.Password,loginVM.RememberMe,lockoutOnFailure:true);
+            if (!result.Succeeded) { 
+                if(result.IsLockedOut)
+                    ModelState.AddModelError("", "Too many attemps Your account is locked out, please try again later");
+                else
+                    ModelState.AddModelError("", "UserName/Email or Password is incorrect");
+                return View(loginVM);
+            }
+            return RedirectToAction("Index", "Home", new { area = "Customer" });
+
+        } 
+
     }
 }
