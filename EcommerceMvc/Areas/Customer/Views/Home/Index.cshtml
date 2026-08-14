@@ -3,58 +3,82 @@
 @{
     ViewData["Title"] = "Home Page";
     var discountedPrice = 50;
-
 }
+
 <header class="bg-dark py-5">
     <div class="container px-4 px-lg-5 my-5">
         <div class="text-center text-white">
             <h1 class="display-4 fw-bolder">Shop in style</h1>
-            <p class="lead fw-normal text-white-50 mb-0">With this shop hompeage template</p>
+            <p class="lead fw-normal text-white-50 mb-0">
+                With this shop homepage template
+            </p>
         </div>
     </div>
 </header>
+
 <div class="container">
+
     <!-- Filter Section -->
     <section class="py-3 filter-bar">
         <div class="container">
-            <div class="row" style="background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;">
+            <div class="row"
+                 style="background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;">
+
                 <div class="col-12">
-                    <form>
+                    <form method="get">
+
                         <div class="row">
+
                             <!-- Product Name -->
                             <div class="col-md-3">
-                                <input type="text" class="form-control" placeholder="Product Name" name="name" value="@ViewBag.Name">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Product Name"
+                                       name="name"
+                                       value="@ViewBag.Name" />
                             </div>
 
-                            <!-- Price Range -->
+                            <!-- Min Price -->
                             <div class="col-md-2">
-                                <input type="number" class="form-control" placeholder="Min Price" name="minPrice" value="@ViewBag.MinPrice">
+                                <input type="number"
+                                       class="form-control"
+                                       placeholder="Min Price"
+                                       name="minPrice"
+                                       value="@ViewBag.MinPrice" />
                             </div>
+
+                            <!-- Max Price -->
                             <div class="col-md-2">
-                                <input type="number" class="form-control" placeholder="Max Price" name="maxPrice" value="@ViewBag.MaxPrice">
+                                <input type="number"
+                                       class="form-control"
+                                       placeholder="Max Price"
+                                       name="maxPrice"
+                                       value="@ViewBag.MaxPrice" />
                             </div>
 
                             <!-- Category -->
                             <div class="col-md-2">
                                 <select name="categoryId" class="form-control">
-                                        <option value="">--Select Category--</option>
-                                    @if (ViewData["Categories"] is IEnumerable<Category> categories){
-                                        @foreach (var item in categories)
+                                    <option value="">--Select Category--</option>
+
+                                    @if (ViewData["Categories"] is IEnumerable<Category> categories)
+                                    {
+                                        foreach (var item in categories)
                                         {
-                                                if (item.ID==ViewBag.CategoryId)
-                                                {
-                                                    
-                                                
-                                                <option selected value="@item.ID">@item.Name</option>
-                                                }
-                                                else
-                                                {
-                                                <option  value="@item.ID">@item.Name</option>
-
-                                                }
+                                            if (item.ID == ViewBag.CategoryId)
+                                            {
+                                                <option selected value="@item.ID">
+                                                    @item.Name
+                                                </option>
                                             }
+                                            else
+                                            {
+                                                <option value="@item.ID">
+                                                    @item.Name
+                                                </option>
+                                            }
+                                        }
                                     }
-
                                 </select>
                             </div>
 
@@ -62,118 +86,198 @@
                             <div class="col-md-2">
                                 <select name="brandId" class="form-control">
                                     <option value="">--Select Brand--</option>
-                                   
-                                        @foreach (var item in ViewBag.Brands)
-                                        {
-                                        if (item.ID == ViewBag.BrandId)
-                                        {   
-                                            <option selected value="@item.ID">@item.Name</option>
-                                            }
-                                            else
-                                            {
-                                            <option  value="@item.ID">@item.Name</option>
 
-                                            }
+                                    @foreach (var item in ViewBag.Brands)
+                                    {
+                                        if (item.ID == ViewBag.BrandId)
+                                        {
+                                            <option selected value="@item.ID">
+                                                @item.Name
+                                            </option>
                                         }
-                                    
+                                        else
+                                        {
+                                            <option value="@item.ID">
+                                                @item.Name
+                                            </option>
+                                        }
+                                    }
                                 </select>
                             </div>
 
-                            <!-- Hot Product Checkbox -->
+                            <!-- Hot Product -->
                             <div class="col-md-1">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" name="isHot" value="true" @(ViewBag.IsHot == true ? "checked" : "")>
-                                    <label class="form-check-label">Hot</label>
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           name="isHot"
+                                           value="true"
+                                           @(ViewBag.IsHot == true ? "checked" : "") />
+
+                                    <label class="form-check-label">
+                                        Hot
+                                    </label>
                                 </div>
                             </div>
+
                         </div>
 
                         <div class="row mt-3">
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-dark w-100">Filter</button>
+                                <button type="submit"
+                                        class="btn btn-dark w-100">
+                                    Filter
+                                </button>
                             </div>
                         </div>
+
                     </form>
                 </div>
+
             </div>
         </div>
     </section>
-  <section class="py-5">
-            <div class="container px-4 px-lg-5 mt-5">
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+
+    <!-- Products Section -->
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 mt-5">
+
+            <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
 
                 @foreach (var product in Model)
                 {
-                    
-                <div class="col mb-5">
+                    <div class="col mb-5">
+
                         <div class="card h-100">
-                            <!-- Product image-->
-                            <img class="card-img-top" src="~/images/@product.MainImage" alt="..." />
-                            <!-- Product details-->
+
+                            <!-- Product Image -->
+                            <img class="card-img-top"
+                                 src="~/images/@product.MainImage"
+                                 alt="@product.Name" />
+
+                            <!-- Product Details -->
                             <div class="card-body p-4">
+
                                 <div class="text-center">
-                                    <!-- Product name-->
-                                    <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem;">@product.Category.Name</div>
-                                      
+
+                                    <!-- Category -->
+                                    <div class="badge bg-dark text-white position-absolute"
+                                         style="top: 0.5rem; right: 0.5rem;">
+                                        @product.Category.Name
+                                    </div>
+
+                                    <!-- Discount -->
                                     @if (product.Discount > discountedPrice)
                                     {
-                                        
-                                        <div class="badge bg-danger text-white position-absolute" style="top: 0.5rem; left: 0.5rem;">offers @product.Discount%</div>
+                                        <div class="badge bg-danger text-white position-absolute"
+                                             style="top: 0.5rem; left: 0.5rem;">
+                                            Offer @product.Discount%
+                                        </div>
+                                    }
 
-                                    } 
-                                    <h5 class="fw-bolder">@product.Name</h5>
+                                    <!-- Product Name -->
+                                    <h5 class="fw-bolder">
+                                        @product.Name
+                                    </h5>
 
+                                    <!-- Rating -->
                                     <div class="star-rating animated-stars">
-                                        @for (int i = product.Rate; i >0; i--)
-                                        {
-                                         
-                                           
-                                                <label for="star5" class="bi bi-star-fill"></label>                                       
-                                                                  
-                                        }
-                                    </div>
-                                    <!-- Product price-->
-                                    <span class="text-decoration-line-through">
 
-                                    @product.Price.ToString("C")
-                                    </span>
-                                    <span>
-                                        @((product.Price - (product.Price*product.Discount)/100).ToString(""))
-                                    </span>
+                                        @for (int i = product.Rate; i > 0; i--)
+                                        {
+                                            <label class="bi bi-star-fill"></label>
+                                        }
+
+                                    </div>
+
+                                    <!-- Product Price -->
+                                    @if (product.Discount > 0)
+                                    {
+                                        <span class="text-decoration-line-through">
+                                            @product.Price.ToString("C")
+                                        </span>
+
+                                        <span>
+                                            @((product.Price -
+                                                (product.Price * product.Discount / 100))
+                                                .ToString("C"))
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            @product.Price.ToString("C")
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                            <!-- Product Actions -->
+                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                                <div class="text-center">
+                                    <a class="btn btn-outline-dark mt-auto"
+                                       href="#">
+                                        View options
+                                    </a>
                                 </div>
                             </div>
-                            <!-- Product actions-->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">View options</a></div>
-                            </div>
+
                         </div>
+
                     </div>
                 }
-             
-                </div>
-            <nav aria-label="Page navigation example "style="display: flex; justify-content: center;">
+
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example"
+                 style="display: flex; justify-content: center;">
+
                 <ul class="pagination">
 
                     @if (ViewBag.currentPage > 1)
                     {
-                    <li class="page-item"><a class="page-link" href="?page=@(ViewBag.currentPage - 1)">Previous</a></li>
-                        
-                    
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page=@(ViewBag.currentPage - 1)">
+                                Previous
+                            </a>
+                        </li>
                     }
+
                     @for (int i = 1; i <= ViewBag.totalPage; i++)
                     {
-                        <li class="page-item"><a class="page-link" href="?page=@i">@i</a></li>
+                        <li class="page-item @(i == ViewBag.currentPage ? "active" : "")">
+
+                            <a class="page-link"
+                               href="?page=@i">
+                                @i
+                            </a>
+
+                        </li>
                     }
+
                     @if (ViewBag.currentPage < ViewBag.totalPage)
                     {
-                        <li class="page-item"><a class="page-link" href="?page=@(ViewBag.currentPage + 1)">Next</a></li>
-
-                        
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page=@(ViewBag.currentPage + 1)">
+                                Next
+                            </a>
+                        </li>
                     }
-                </ul>
-            </nav>
-            </div>
-        </section>
-</div>
 
- 
+                </ul>
+
+            </nav>
+
+        </div>
+    </section>
+
+</div>
+@section Scripts {
+  <partial name="_NotificationPartial" />
+  
+}

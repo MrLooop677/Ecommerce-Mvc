@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ECommerce.Utitlies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceMvc
@@ -22,9 +24,13 @@ namespace EcommerceMvc
                     option.Password.RequiredLength = 6;
                     option.Password.RequireNonAlphanumeric = false;
                     option.Lockout.MaxFailedAccessAttempts = 3;
+                    option.SignIn.RequireConfirmedEmail = true;
                 }
                 )
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IRepository<Category>, Repository<Category>>();
             services.AddScoped<IRepository<Brand>, Repository<Brand>>();
             services.AddScoped<IRepository<Product>, Repository<Product>>();
