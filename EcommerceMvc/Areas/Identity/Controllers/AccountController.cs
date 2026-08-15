@@ -12,7 +12,7 @@ namespace EcommerceMvc.Areas.Identity.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public AccountController(UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager,IEmailSender emailSender)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -27,13 +27,14 @@ namespace EcommerceMvc.Areas.Identity.Controllers
         {
             if (!ModelState.IsValid)
                 return View();
-            var user = new ApplicationUser() {
+            var user = new ApplicationUser()
+            {
                 Email = registerVM.Email,
                 UserName = registerVM.UserName,
                 FirstName = registerVM.FirstName,
                 LastName = registerVM.LastName
             };
-            var result = await _userManager.CreateAsync(user,registerVM.Password);
+            var result = await _userManager.CreateAsync(user, registerVM.Password);
 
             if (!result.Succeeded)
             {
@@ -50,7 +51,7 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             // generate token
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             //generate confirmation link
-            var link = Url.Action(nameof(ConfirmEmail), "Account", new { area="Identity", token ,userId=user.Id},Request.Scheme);
+            var link = Url.Action(nameof(ConfirmEmail), "Account", new { area = "Identity", token, userId = user.Id }, Request.Scheme);
             await _emailSender.SendEmailAsync(registerVM.Email, "Confirm your email", "Please confirm your email by clicking here: <a href='" + link + "'>Confirm Email</a>");
 
             return RedirectToAction("Login");
@@ -64,12 +65,44 @@ namespace EcommerceMvc.Areas.Identity.Controllers
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)
-                 TempData["error-notification"] = "Invalid OR Expired Token";
+                TempData["error-notification"] = "Invalid OR Expired Token";
             else
-               TempData["success-notification"] = "Email confirmed successfully";
+                TempData["success-notification"] = "Email confirmed successfully";
 
             return RedirectToAction("Login", "Account", new { area = "Identity" });
 
+        }
+
+        public IActionResult ResendEmailConfirmation()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResendEmailConfirmation(ResendEmailConfirmationVM resendEmailConfirmationVM
+            )
+        {
+
+            if (!ModelState.IsValid)
+                return View();
+            var user = await _userManager.FindByNameAsync(resendEmailConfirmationVM.UserNameOREmail) ?? await _userManager.FindByEmailAsync(resendEmailConfirmationVM.UserNameOREmail);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "UserName/Email not found");
+                return View(resendEmailConfirmationVM);
+            }
+
+            if (user.EmailConfirmed)
+            {
+                ModelState.AddModelError("", "Your Email is already confirmed, please login");
+                return View(resendEmailConfirmationVM);
+            }
+            // send confirmation mail
+            // generate token
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //generate confirmation link
+            var link = Url.Action(nameof(ConfirmEmail), "Account", new { area = "Identity", token, userId = user.Id }, Request.Scheme);
+            await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", "Please confirm your email by clicking here: <a href='" + link + "'>Confirm Email</a>");
+            return RedirectToAction("Login");
         }
         public IActionResult Login()
         {
@@ -80,14 +113,15 @@ namespace EcommerceMvc.Areas.Identity.Controllers
         {
             if (!ModelState.IsValid)
                 return View();
-            var user =await _userManager.FindByNameAsync(loginVM.userNameOREmail) ??await _userManager.FindByEmailAsync(loginVM.userNameOREmail);
+            var user = await _userManager.FindByNameAsync(loginVM.userNameOREmail) ?? await _userManager.FindByEmailAsync(loginVM.userNameOREmail);
             if (user == null)
             {
                 ModelState.AddModelError("", "UserName/Email or Password is incorrect");
                 return View(loginVM);
             }
-            var result = await _signInManager.PasswordSignInAsync(user,loginVM.Password,loginVM.RememberMe,lockoutOnFailure:true);
-            if (!result.Succeeded) {
+            var result = await _signInManager.PasswordSignInAsync(user, loginVM.Password, loginVM.RememberMe, lockoutOnFailure: true);
+            if (!result.Succeeded)
+            {
                 if (result.IsLockedOut)
                     ModelState.AddModelError("", "Too many attemps Your account is locked out, please try again later");
                 else if (!user.EmailConfirmed)
@@ -98,7 +132,7 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             }
             return RedirectToAction("Index", "Home", new { area = "Customer" });
 
-        } 
+        }
 
     }
 }
