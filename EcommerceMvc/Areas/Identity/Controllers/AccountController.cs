@@ -11,12 +11,14 @@ namespace EcommerceMvc.Areas.Identity.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IRepository<ApplicationUserOtp> _applicationUserOtpRepository;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IRepository<ApplicationUserOtp> applicationUserOtpRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _applicationUserOtpRepository = applicationUserOtpRepository;
         }
         public IActionResult Register()
         {
@@ -103,6 +105,38 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             var link = Url.Action(nameof(ConfirmEmail), "Account", new { area = "Identity", token, userId = user.Id }, Request.Scheme);
             await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", "Please confirm your email by clicking here: <a href='" + link + "'>Confirm Email</a>");
             return RedirectToAction("Login");
+        }
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordVM forgetPasswordVM
+            )
+        {
+
+            if (!ModelState.IsValid)
+                return View();
+            var user = await _userManager.FindByNameAsync(forgetPasswordVM.UserNameOREmail) ?? await _userManager.FindByEmailAsync(forgetPasswordVM.UserNameOREmail);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "UserName/Email not found");
+                return View(forgetPasswordVM);
+            }
+
+            // send confirmation mail
+            // generate token
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //generate rondome otp and save in database
+        var otp= new Random().Next(1000, 9999);
+
+            await _applicationUserOtpRepository.AddAsync(new() { 
+                Id=Guid.NewGuid().ToString(),
+                ApplicationUserId = user.Id,
+            });
+
+            await _emailSender.SendEmailAsync(user.Email!, "Resete Your Password", $"<h1>Use this OTP : {otp} to reset password</h1");
+            return RedirectToAction("ValidateOtp");
         }
         public IActionResult Login()
         {
