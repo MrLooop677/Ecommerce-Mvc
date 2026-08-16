@@ -124,20 +124,78 @@ namespace EcommerceMvc.Areas.Identity.Controllers
                 return View(forgetPasswordVM);
             }
 
-            // send confirmation mail
-            // generate token
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            //generate rondome otp and save in database
-        var otp= new Random().Next(1000, 9999);
+            // chck on times user send otps on day
+            var userOtps = await _applicationUserOtpRepository.GetAsync(e=>e.ApplicationUserId==user.Id);
+            var totalOtpsSentToday = userOtps.Count(e=>(DateTime.UtcNow-e.CreatedAte).TotalHours<24);
+            if (totalOtpsSentToday > 3) {
+                ModelState.AddModelError("", "Too Many Attemps");
+                return View(forgetPasswordVM);
+            }
+
+             //generate rondome otp and save in database
+             var otp = new Random().Next(1000, 9999).ToString();
 
             await _applicationUserOtpRepository.AddAsync(new() { 
                 Id=Guid.NewGuid().ToString(),
                 ApplicationUserId = user.Id,
-            });
+                OTP= otp,
+                CreatedAte=DateTime.UtcNow,
+                IsValid=true,
+                ValidTo=DateTime.UtcNow.AddDays(1)
 
+            });
+             await _applicationUserOtpRepository.CommitAsync();
+            // send Otp mail
             await _emailSender.SendEmailAsync(user.Email!, "Resete Your Password", $"<h1>Use this OTP : {otp} to reset password</h1");
-            return RedirectToAction("ValidateOtp");
+            return RedirectToAction("ValidateOtp",new { userId=user.Id});
         }
+
+        public IActionResult ValidateOTP(string userId)
+        {
+            return View(new ValidateOTPVM { ApplicationUserId = userId });
+        }   
+        [HttpPost]
+        public async Task<IActionResult> ValidateOTP(ValidateOTPVM validateOTPVM)
+        {
+         var result=await _applicationUserOtpRepository.GetOneAsync(e=>e.ApplicationUserId==validateOTPVM.ApplicationUserId&&e.OTP==validateOTPVM.OTP&&e.IsValid);
+            if(result==null)
+            {
+                ModelState.AddModelError("", "Invalid OTP");
+                return RedirectToAction(nameof(ValidateOTP), new { userId = validateOTPVM.ApplicationUserId });
+            }
+            return RedirectToAction("ResetPassword", new { userId = result.ApplicationUserId });
+        }   
+        public IActionResult ResetPassword(string userId)
+        {
+            return View(new ResetPasswordVM { ApplicationUserId = userId });
+        }   
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordVM resetPasswordVM)
+        {
+            var user=await _userManager.FindByIdAsync(resetPasswordVM.ApplicationUserId);
+
+            if(user == null)
+            {
+                ModelState.AddModelError("", "User not found");
+                return View(resetPasswordVM);
+            }
+
+            //generaete fake token for reset password
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+
+         var result= await _userManager.ResetPasswordAsync(user,
+                token,resetPasswordVM.Password)  ;
+
+            if (!result.Succeeded) {
+                foreach (var item in result.Errors) { 
+                    ModelState.AddModelError("", item.Description);
+                }
+                return View(resetPasswordVM);
+            }
+
+            return RedirectToAction(nameof(Login));
+        }   
         public IActionResult Login()
         {
             return View();
