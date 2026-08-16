@@ -234,7 +234,6 @@ namespace EcommerceMvc.Areas.Identity.Controllers
 
 
         [HttpPost]
-
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
@@ -311,5 +310,10 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             return RedirectToAction(nameof(Login));
         }
 
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
     }
 }
