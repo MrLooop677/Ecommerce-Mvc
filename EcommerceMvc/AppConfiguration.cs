@@ -49,6 +49,7 @@ namespace EcommerceMvc
                 opt.ClientId = googleAuth["ClientId"];
                 opt.ClientSecret = googleAuth["ClientSecret"];
                 opt.SignInScheme = IdentityConstants.ExternalScheme;
+                opt.Prompt = "select_account";
             }); 
         }
     }

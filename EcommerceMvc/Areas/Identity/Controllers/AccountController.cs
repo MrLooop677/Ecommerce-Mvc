@@ -313,6 +313,7 @@ namespace EcommerceMvc.Areas.Identity.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            
             return RedirectToAction("Login");
         }
     }
