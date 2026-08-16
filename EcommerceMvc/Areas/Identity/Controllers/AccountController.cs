@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EcommerceMvc.Areas.Identity.Controllers
 {
@@ -125,56 +126,58 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             }
 
             // chck on times user send otps on day
-            var userOtps = await _applicationUserOtpRepository.GetAsync(e=>e.ApplicationUserId==user.Id);
-            var totalOtpsSentToday = userOtps.Count(e=>(DateTime.UtcNow-e.CreatedAte).TotalHours<24);
-            if (totalOtpsSentToday > 3) {
+            var userOtps = await _applicationUserOtpRepository.GetAsync(e => e.ApplicationUserId == user.Id);
+            var totalOtpsSentToday = userOtps.Count(e => (DateTime.UtcNow - e.CreatedAte).TotalHours < 24);
+            if (totalOtpsSentToday > 3)
+            {
                 ModelState.AddModelError("", "Too Many Attemps");
                 return View(forgetPasswordVM);
             }
 
-             //generate rondome otp and save in database
-             var otp = new Random().Next(1000, 9999).ToString();
+            //generate rondome otp and save in database
+            var otp = new Random().Next(1000, 9999).ToString();
 
-            await _applicationUserOtpRepository.AddAsync(new() { 
-                Id=Guid.NewGuid().ToString(),
+            await _applicationUserOtpRepository.AddAsync(new()
+            {
+                Id = Guid.NewGuid().ToString(),
                 ApplicationUserId = user.Id,
-                OTP= otp,
-                CreatedAte=DateTime.UtcNow,
-                IsValid=true,
-                ValidTo=DateTime.UtcNow.AddDays(1)
+                OTP = otp,
+                CreatedAte = DateTime.UtcNow,
+                IsValid = true,
+                ValidTo = DateTime.UtcNow.AddDays(1)
 
             });
-             await _applicationUserOtpRepository.CommitAsync();
+            await _applicationUserOtpRepository.CommitAsync();
             // send Otp mail
             await _emailSender.SendEmailAsync(user.Email!, "Resete Your Password", $"<h1>Use this OTP : {otp} to reset password</h1");
-            return RedirectToAction("ValidateOtp",new { userId=user.Id});
+            return RedirectToAction("ValidateOtp", new { userId = user.Id });
         }
 
         public IActionResult ValidateOTP(string userId)
         {
             return View(new ValidateOTPVM { ApplicationUserId = userId });
-        }   
+        }
         [HttpPost]
         public async Task<IActionResult> ValidateOTP(ValidateOTPVM validateOTPVM)
         {
-         var result=await _applicationUserOtpRepository.GetOneAsync(e=>e.ApplicationUserId==validateOTPVM.ApplicationUserId&&e.OTP==validateOTPVM.OTP&&e.IsValid);
-            if(result==null)
+            var result = await _applicationUserOtpRepository.GetOneAsync(e => e.ApplicationUserId == validateOTPVM.ApplicationUserId && e.OTP == validateOTPVM.OTP && e.IsValid);
+            if (result == null)
             {
                 ModelState.AddModelError("", "Invalid OTP");
                 return RedirectToAction(nameof(ValidateOTP), new { userId = validateOTPVM.ApplicationUserId });
             }
             return RedirectToAction("ResetPassword", new { userId = result.ApplicationUserId });
-        }   
+        }
         public IActionResult ResetPassword(string userId)
         {
             return View(new ResetPasswordVM { ApplicationUserId = userId });
-        }   
+        }
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordVM resetPasswordVM)
         {
-            var user=await _userManager.FindByIdAsync(resetPasswordVM.ApplicationUserId);
+            var user = await _userManager.FindByIdAsync(resetPasswordVM.ApplicationUserId);
 
-            if(user == null)
+            if (user == null)
             {
                 ModelState.AddModelError("", "User not found");
                 return View(resetPasswordVM);
@@ -184,18 +187,20 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
 
-         var result= await _userManager.ResetPasswordAsync(user,
-                token,resetPasswordVM.Password)  ;
+            var result = await _userManager.ResetPasswordAsync(user,
+                   token, resetPasswordVM.Password);
 
-            if (!result.Succeeded) {
-                foreach (var item in result.Errors) { 
+            if (!result.Succeeded)
+            {
+                foreach (var item in result.Errors)
+                {
                     ModelState.AddModelError("", item.Description);
                 }
                 return View(resetPasswordVM);
             }
 
             return RedirectToAction(nameof(Login));
-        }   
+        }
         public IActionResult Login()
         {
             return View();
@@ -224,6 +229,86 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             }
             return RedirectToAction("Index", "Home", new { area = "Customer" });
 
+        }
+
+
+
+        [HttpPost]
+
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+        [HttpGet]
+
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            if (remoteError != null)
+            {
+                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
+                return RedirectToAction(nameof(Login));
+            }
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Try signing in with an external login
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            if (signInResult.Succeeded)
+            {
+                return LocalRedirect(returnUrl ?? "/");
+            }
+
+            // If the user cannot log in, try finding them by email
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var username = info.Principal.FindFirstValue(ClaimTypes.Name);
+            if (email != null)
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    // Create a new user if they do not exist
+                    Random random = new Random();
+                    int r = random.Next(1000, 9999);
+                    user = new ApplicationUser
+                    {
+                        UserName = username.Replace(" ", "") + r.ToString(),
+                        Email = email,
+                        EmailConfirmed = true
+                    };
+                    var createUserResult = await _userManager.CreateAsync(user);
+                    if (!createUserResult.Succeeded)
+                    {
+                        ModelState.AddModelError(string.Empty, "Error creating user.");
+                        return RedirectToAction(nameof(Login));
+                    }
+                }
+
+                // Ensure the external login is linked
+                var existingLogins = await _userManager.GetLoginsAsync(user);
+                var hasGoogleLogin = existingLogins.Any(l => l.LoginProvider == info.LoginProvider);
+
+                if (!hasGoogleLogin)
+                {
+                    var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                    if (!addLoginResult.Succeeded)
+                    {
+                        ModelState.AddModelError(string.Empty, "Error linking external login.");
+                        return RedirectToAction(nameof(Login));
+                    }
+                }
+
+                // Sign in the user
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return LocalRedirect(returnUrl ?? "/");
+            }
+
+            return RedirectToAction(nameof(Login));
         }
 
     }

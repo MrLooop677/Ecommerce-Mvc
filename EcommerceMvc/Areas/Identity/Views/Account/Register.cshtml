@@ -50,6 +50,7 @@
         </div>
 
     </form>
+<partial name="_ExternalAuthenticationPartial" />
     <div>
         <a asp-action="Index">Back to List</a>
     </br>
@@ -57,7 +58,6 @@
         <a asp-action="Login">Login</a>
     </div>
 </div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

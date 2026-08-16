@@ -7,7 +7,7 @@ namespace EcommerceMvc
 {
     public static class AppConfiguration
     {
-        public static void RegisterConfiguration(this IServiceCollection services, string connectionString)
+        public static void RegisterConfiguration(this IServiceCollection services, string connectionString, IConfiguration configuration)
         {
           
 
@@ -39,6 +39,17 @@ namespace EcommerceMvc
             services.AddScoped<IRepository<ProductColor>, Repository<ProductColor>>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRepository<ApplicationUserOtp>, Repository<ApplicationUserOtp>>();
+
+            services.AddAuthentication()
+            .AddGoogle("google", opt =>
+            {
+                var googleAuth =
+                    configuration.GetSection("Authentication:Google");
+
+                opt.ClientId = googleAuth["ClientId"];
+                opt.ClientSecret = googleAuth["ClientSecret"];
+                opt.SignInScheme = IdentityConstants.ExternalScheme;
+            }); 
         }
     }
 }

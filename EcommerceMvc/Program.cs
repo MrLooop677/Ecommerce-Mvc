@@ -13,7 +13,7 @@ var connectionString =
       + "'DefaultConnection' not found.");
 
 //AppConfiguration.RegisterConfiguration(builder.Services, connectionString);
-builder.Services.RegisterConfiguration( connectionString);
+builder.Services.RegisterConfiguration( connectionString, builder.Configuration);
 
 var app = builder.Build();
 
