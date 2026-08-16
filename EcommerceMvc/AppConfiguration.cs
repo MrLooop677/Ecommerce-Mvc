@@ -9,7 +9,7 @@ namespace EcommerceMvc
     {
         public static void RegisterConfiguration(this IServiceCollection services, string connectionString, IConfiguration configuration)
         {
-          
+
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -18,9 +18,10 @@ namespace EcommerceMvc
                 //options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
                 options.UseSqlServer(connectionString);
             });
-            services.AddIdentity<ApplicationUser,IdentityRole>(
-                option => { 
-                option.User.RequireUniqueEmail = true;
+            services.AddIdentity<ApplicationUser, IdentityRole>(
+                option =>
+                {
+                    option.User.RequireUniqueEmail = true;
                     option.Password.RequiredLength = 6;
                     option.Password.RequireNonAlphanumeric = false;
                     option.Lockout.MaxFailedAccessAttempts = 3;
@@ -40,17 +41,40 @@ namespace EcommerceMvc
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRepository<ApplicationUserOtp>, Repository<ApplicationUserOtp>>();
 
+            //external login with google
             services.AddAuthentication()
-            .AddGoogle("google", opt =>
-            {
-                var googleAuth =
-                    configuration.GetSection("Authentication:Google");
+           .AddGoogle("google", opt =>
+           {
+               var googleAuth =
+                   configuration.GetSection("Authentication:Google");
 
-                opt.ClientId = googleAuth["ClientId"];
-                opt.ClientSecret = googleAuth["ClientSecret"];
-                opt.SignInScheme = IdentityConstants.ExternalScheme;
-                opt.Prompt = "select_account";
-            }); 
+               opt.ClientId = googleAuth["ClientId"]
+                   ?? throw new InvalidOperationException("Google ClientId not found.");
+
+               opt.ClientSecret = googleAuth["ClientSecret"]
+                   ?? throw new InvalidOperationException("Google ClientSecret not found.");
+
+               opt.SignInScheme = IdentityConstants.ExternalScheme;
+
+               opt.Events.OnRedirectToAuthorizationEndpoint = context =>
+               {
+                   var redirectUri = context.RedirectUri;
+
+                   redirectUri += redirectUri.Contains('?')
+                       ? "&prompt=select_account"
+                       : "?prompt=select_account";
+
+                   context.Response.Redirect(redirectUri);
+
+                   return Task.CompletedTask;
+               };
+           });
+            //external login with facebook
+            services.AddAuthentication().AddFacebook(facebookOptions =>
+            {
+                facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
+                facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+            });
         }
     }
 }
