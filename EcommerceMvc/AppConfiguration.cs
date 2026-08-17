@@ -1,4 +1,5 @@
 ﻿using ECommerce.Utitlies;
+using EcommerceMvc.Utitlies.DBInitializer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +76,9 @@ namespace EcommerceMvc
                 facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
                 facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
             });
+
+            //roles and super admin seeding
+            services.AddTransient<IDBInitializer, DBInitializer>();
         }
     }
 }

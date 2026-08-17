@@ -1,4 +1,5 @@
 using EcommerceMvc;
+using EcommerceMvc.Utitlies.DBInitializer;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,9 @@ var connectionString =
 builder.Services.RegisterConfiguration( connectionString, builder.Configuration);
 
 var app = builder.Build();
-
+var scope=app.Services.CreateScope();
+var services = scope.ServiceProvider.GetService<IDBInitializer>();
+services?.Initialize();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
