@@ -1,4 +1,6 @@
-﻿using EcommerceMvc.ViewModel;
+﻿using EcommerceMvc.Utitlies;
+using EcommerceMvc.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
@@ -7,19 +9,17 @@ using static System.Net.Mime.MediaTypeNames;
 namespace EcommerceMvc.Areas.Admin.Controllers
 {
     [Area("Admin")]
-
+    [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE},{SataticData.EMPLOYEE_ROLE}")]
     public class ProductController : Controller
     {
-        //ApplicationDbContext _context;//= new();
+        //ApplicationDbContext _context;//= new(); 
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductController(  IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-
     
-
      
         public async Task<IActionResult> Index(FilterProductVM FilterProductVM, CancellationToken cancellationToken, int page = 1)
         {
@@ -170,6 +170,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE}, {SataticData.ADMIN_ROLE}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
@@ -190,6 +191,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             });
         }
         [HttpPost]
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE}, {SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> Edit(Product product, IFormFile? image, int id, string[] colors, List<IFormFile>? SubImgs, CancellationToken cancellationToken)
         {
             //var selectedproduct = _context.Products.Include(p => p.ProductSubImages).Include(p => p.ProductColors).FirstOrDefault(c => c.ID == product.ID);
@@ -285,6 +287,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE}, {SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> DeleteSubImg(int productId, string img, CancellationToken cancellationToken)
         {
             var productSubImg = await _unitOfWork.ProductSubImgRepository.GetOneAsync(expression: e => e.Img == img && e.ProductId == productId, cancellationToken: cancellationToken);
@@ -303,6 +306,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             await _unitOfWork.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Edit), new { id = productId });
         }
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE}, {SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             var deletedItem = await _unitOfWork.ProductRepository.GetOneAsync(expression: c => c.ID == id, cancellationToken: cancellationToken);

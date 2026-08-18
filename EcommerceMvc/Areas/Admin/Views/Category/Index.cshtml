@@ -47,10 +47,18 @@
                                 }else{
                                 <td><span class="badge bg-danger">Inactive</span></td>
                                 }
-                                <td>
-                                    <a href="/Admin/Category/Edit/@category.ID" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="/Admin/Category/Delete/@category.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
-                                </td>
+                                                                @if (User.IsInRole(SataticData.SUPER_ADMIN_ROLE) ||
+                                         User.IsInRole(SataticData.ADMIN_ROLE))
+                                    {
+
+                                            
+                                        <a href="/Admin/Category/Edit/@category.ID" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="/Admin/Category/Delete/@category.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No Actions</span>
+                                    }
                             </tr>
 
                             }

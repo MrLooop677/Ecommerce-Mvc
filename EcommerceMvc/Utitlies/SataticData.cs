@@ -2,10 +2,10 @@
 {
     public class SataticData
     {
-        public static string SUPER_ADMIN_ROLE = "SuperAdmin";
-        public static string ADMIN_ROLE = "Admin";
-        public static string EMPLOYEE_ROLE = "Employee";
-        public static string CUSTOMER_ROLE = "Customer";
+        public const string SUPER_ADMIN_ROLE = "SuperAdmin";
+        public const string ADMIN_ROLE = "Admin";
+        public const string EMPLOYEE_ROLE = "Employee";
+        public const string CUSTOMER_ROLE = "Customer";
 
     }
 }

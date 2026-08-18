@@ -1,5 +1,7 @@
-﻿using EcommerceMvc.ViewModel;
+﻿using EcommerceMvc.Utitlies;
+using EcommerceMvc.ViewModel;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +10,7 @@ using static System.Net.Mime.MediaTypeNames;
 namespace EcommerceMvc.Areas.Admin.Controllers
 {
     [Area("Admin")]
-
+    [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE}, {SataticData.ADMIN_ROLE}, {SataticData.EMPLOYEE_ROLE}")]
     public class BrandController : Controller
     {
         //ApplicationDbContext _context = new();
@@ -74,6 +76,8 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE}")]
+
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
             //var selectedbrand = _context.Brands.FirstOrDefault(c => c.ID == id);
@@ -98,6 +102,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
 
         }
         [HttpPost]
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> Edit(UpdateBrandVM updateBrandVM,CancellationToken cancellationToken)
         {
             if(!ModelState.IsValid) 
@@ -151,6 +156,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         //[HttpGet]
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE}")]
 
         public async Task<IActionResult> Delete(int id)
         {

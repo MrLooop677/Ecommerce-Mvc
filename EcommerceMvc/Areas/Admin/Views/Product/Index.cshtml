@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using EcommerceMvc.Utitlies
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -66,7 +67,7 @@
                                     if (item.ID == ViewBag.CategoryId)
                                     {
 
-                                                    
+
                                         <option selected value="@item.ID">@item.Name</option>
                                     }
                                     else
@@ -172,8 +173,18 @@
                                 </td>
 
                                 <td>
-                                    <a href="/Admin/Product/Edit/@Product.ID" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="/Admin/Product/Delete/@Product.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
+                                    @if (User.IsInRole(SataticData.SUPER_ADMIN_ROLE) ||
+                                         User.IsInRole(SataticData.ADMIN_ROLE))
+                                    {
+
+                                            
+                                        <a href="/Admin/Product/Edit/@Product.ID" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="/Admin/Product/Delete/@Product.ID" class="btn btn-delete btn-sm btn-danger">Delete</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No Actions</span>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -283,5 +294,5 @@
         <partial name="_NotificationPartial">
         } *@
         
-    </body>
+</body>
 </html>

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EcommerceMvc.Utitlies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceMvc.Areas.Admin.Controllers
 {
     [Area("Admin")]
-
+    [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE}, {SataticData.ADMIN_ROLE}, {SataticData.EMPLOYEE_ROLE}")]
     public class CategoryController : Controller
     {
         //ApplicationDbContext _context = new ();
@@ -42,6 +44,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> Edit(int id,CancellationToken cancellationToken)
         {
             var selectedCategory =await _unitOfWork.CategoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
@@ -53,6 +56,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
             return View(selectedCategory);
         }
         [HttpPost]
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> Edit(Category category,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -65,6 +69,7 @@ namespace EcommerceMvc.Areas.Admin.Controllers
            await _unitOfWork.CommitAsync(cancellationToken);
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Roles = $"{SataticData.SUPER_ADMIN_ROLE},{SataticData.ADMIN_ROLE}")]
         public async Task<IActionResult> Delete(int id,CancellationToken cancellationToken) 
         {
             var deletedItem =await _unitOfWork.CategoryRepository.GetOneAsync(c => c.ID == id,cancellationToken: cancellationToken);
