@@ -15,7 +15,7 @@ var connectionString =
 
 //AppConfiguration.RegisterConfiguration(builder.Services, connectionString);
 builder.Services.RegisterConfiguration( connectionString, builder.Configuration);
-
+builder.Services.RegisterMapsterConfig(); 
 var app = builder.Build();
 var scope=app.Services.CreateScope();
 var services = scope.ServiceProvider.GetService<IDBInitializer>();

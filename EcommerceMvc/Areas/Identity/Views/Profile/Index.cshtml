@@ -1,0 +1,255 @@
+﻿@model ApplicationUserVM
+
+<div class="container">
+    <div class="row gutters my-3">
+
+        <!-- Profile Sidebar -->
+        <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="account-settings">
+
+                        <div class="user-profile">
+                            <div class="user-avatar">
+                                <img src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                                     alt="User Avatar"
+                                     style="width: 90px">
+                            </div>
+
+                            <h5 class="user-name">
+                                @Model.FullName
+                            </h5>
+
+                            <h6 class="user-email">
+                                @Model.Email
+                            </h6>
+                        </div>
+
+                        <div class="about">
+                            <h5>About</h5>
+                            <p>
+                                I'm Yuki. Full Stack Designer I enjoy creating
+                                user-centric, delightful and human experiences.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+
+            <!-- Update Profile -->
+            <form asp-action="UpdateProfile" method="post">
+
+                <div class="card h-100">
+                    <div class="card-body">
+
+                        <div class="row gutters">
+
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <h6 class="mb-2 text-primary">
+                                    Personal Details
+                                </h6>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label asp-for="FullName" class="control-label">
+                                        Full Name
+                                    </label>
+
+                                    <input asp-for="FullName"
+                                           class="form-control"
+                                           placeholder="Enter full name" />
+
+                                    <span asp-validation-for="FullName"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label asp-for="Email" class="control-label">
+                                        Email
+                                    </label>
+
+                                    <input asp-for="Email"
+                                           class="form-control"
+                                           placeholder="Enter email ID"
+                                           disabled />
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label asp-for="PhoneNumber" class="control-label">
+                                        Phone
+                                    </label>
+
+                                    <input asp-for="PhoneNumber"
+                                           class="form-control"
+                                           placeholder="Enter phone number" />
+
+                                    <span asp-validation-for="PhoneNumber"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Address -->
+                        <div class="row gutters">
+
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <h6 class="mt-3 mb-2 text-primary">
+                                    Address
+                                </h6>
+                            </div>
+
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label asp-for="Address" class="control-label">
+                                        Address
+                                    </label>
+
+                                    <input asp-for="Address"
+                                           class="form-control"
+                                           placeholder="Enter Address" />
+
+                                    <span asp-validation-for="Address"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Profile Buttons -->
+                        <div class="row gutters my-3">
+
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="text-right">
+
+                                    <button type="reset"
+                                            id="cancel-profile"
+                                            class="btn btn-secondary">
+                                        Cancel
+                                    </button>
+
+                                    <button type="submit"
+                                            id="update-profile"
+                                            class="btn btn-primary">
+                                        Update
+                                    </button>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- Update Password -->
+            <form asp-action="UpdatePassword" method="post">
+
+                <div class="card h-100 mt-3">
+                    <div class="card-body">
+
+                        <div class="row gutters">
+
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <h6 class="mb-2 text-primary">
+                                    Update Password
+                                </h6>
+                            </div>
+
+                            <!-- Current Password -->
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+
+                                    <label asp-for="CurrentPassword"
+                                           class="control-label">
+                                        Current Password
+                                    </label>
+
+                                    <input asp-for="CurrentPassword"
+                                           type="password"
+                                           class="form-control"
+                                           placeholder="Enter Current Password" />
+
+                                    <span asp-validation-for="CurrentPassword"
+                                          class="text-danger">
+                                    </span>
+
+                                </div>
+                            </div>
+
+                            <!-- New Password -->
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+
+                                    <label asp-for="NewPassword"
+                                           class="control-label">
+                                        New Password
+                                    </label>
+
+                                    <input asp-for="NewPassword"
+                                           type="password"
+                                           class="form-control"
+                                           placeholder="Enter New Password" />
+
+                                    <span asp-validation-for="NewPassword"
+                                          class="text-danger">
+                                    </span>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Password Button -->
+                        <div class="row gutters my-3">
+
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="text-right">
+
+                                    <button type="submit"
+                                            id="update-password"
+                                            class="btn btn-primary">
+                                        Update Password
+                                    </button>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} 
+@section Scripts
+{
+    <partial name="_NotificationPartial" />
+}

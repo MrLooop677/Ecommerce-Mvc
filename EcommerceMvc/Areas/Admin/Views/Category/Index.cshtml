@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<Category>
+@using EcommerceMvc.Utitlies
 
 <!DOCTYPE html>
 <html lang="en">
@@ -47,7 +48,7 @@
                                 }else{
                                 <td><span class="badge bg-danger">Inactive</span></td>
                                 }
-                                                                @if (User.IsInRole(SataticData.SUPER_ADMIN_ROLE) ||
+                                  @if (User.IsInRole(SataticData.SUPER_ADMIN_ROLE) ||
                                          User.IsInRole(SataticData.ADMIN_ROLE))
                                     {
 
