@@ -43,7 +43,7 @@ namespace EcommerceMvc.Utitlies.DBInitializer
                         EmailConfirmed = true,
                     },"SuperAdmin@123").GetAwaiter().GetResult() ;
                     var user=_userManager.FindByNameAsync("superadmin").GetAwaiter().GetResult();
-                    _userManager.AddToRoleAsync(user!, SataticData.SUPER_ADMIN_ROLE);
+                    _userManager.AddToRoleAsync(user!, SataticData.SUPER_ADMIN_ROLE); 
                 }
 
                 

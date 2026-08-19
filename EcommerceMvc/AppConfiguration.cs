@@ -32,6 +32,12 @@ namespace EcommerceMvc
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login"; // Default login path
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied"; // Default access denied path
+            });
+
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IRepository<Category>, Repository<Category>>();
             services.AddScoped<IRepository<Brand>, Repository<Brand>>();

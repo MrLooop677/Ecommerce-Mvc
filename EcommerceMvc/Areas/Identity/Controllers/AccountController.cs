@@ -1,4 +1,5 @@
-﻿using EcommerceMvc.ViewModel;
+﻿using EcommerceMvc.Utitlies;
+using EcommerceMvc.ViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +58,7 @@ namespace EcommerceMvc.Areas.Identity.Controllers
             var link = Url.Action(nameof(ConfirmEmail), "Account", new { area = "Identity", token, userId = user.Id }, Request.Scheme);
             await _emailSender.SendEmailAsync(registerVM.Email, "Confirm your email", "Please confirm your email by clicking here: <a href='" + link + "'>Confirm Email</a>");
 
+          await  _userManager.AddToRoleAsync(user, SataticData.CUSTOMER_ROLE);
             return RedirectToAction("Login");
 
         }
