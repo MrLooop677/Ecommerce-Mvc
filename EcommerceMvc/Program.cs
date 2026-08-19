@@ -1,4 +1,5 @@
 using EcommerceMvc;
+using EcommerceMvc.Configurations;
 using EcommerceMvc.Utitlies.DBInitializer;
 using Microsoft.EntityFrameworkCore;
 

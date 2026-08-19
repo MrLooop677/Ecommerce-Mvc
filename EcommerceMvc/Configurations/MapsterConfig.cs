@@ -1,4 +1,5 @@
 ﻿using EcommerceMvc.ViewModel;
+using Mapster;
 
 namespace EcommerceMvc.Configurations
 {
@@ -6,8 +7,9 @@ namespace EcommerceMvc.Configurations
     {
         public static void RegisterMapsterConfig(this IServiceCollection services) {
 
-            TypeAdapterConfig<ApplicationUser, ApplicationUserVM>().NewConfig()
-                .Map(dest => dest.FullName, src => $"{src.FirstName} {src.LastName}");
+            TypeAdapterConfig<ApplicationUser, ApplicationUserVM>.NewConfig()
+                .Map(dest => dest.FullName, src => $"{src.FirstName} {src.LastName}")
+                .TwoWays();
 
         }
     }
