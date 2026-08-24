@@ -47,6 +47,7 @@ namespace EcommerceMvc
             services.AddScoped<IRepository<ProductColor>, Repository<ProductColor>>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRepository<ApplicationUserOtp>, Repository<ApplicationUserOtp>>();
+            services.AddScoped<IRepository<Cart>, Repository<Cart>>();
 
             //external login with google
             services.AddAuthentication()

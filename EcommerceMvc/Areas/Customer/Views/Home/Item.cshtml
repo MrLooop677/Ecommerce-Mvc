@@ -54,7 +54,7 @@
 
                 <!-- Add to Cart -->
                 <div class="d-flex">
-                    <form action="Item" method="post">
+                    <form asp-action="AddToCart" asp-controller="Cart" method="post">
                         <input type="hidden"
                                name="productId"
                                value="@Model.product.ID">
