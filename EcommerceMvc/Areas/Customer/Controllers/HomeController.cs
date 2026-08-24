@@ -76,14 +76,16 @@ namespace EcommerceMvc.Areas.Customer.Controllers
         // product details
         public async Task<IActionResult> Item(int id,CancellationToken cancellationToken)
         {   
-            var product =await _context.Products.Include(p=>p.Category).AsNoTracking().FirstOrDefaultAsync(p=>p.ID==id,cancellationToken);
+            var product =await _context.Products.Include(p=>p.Category).FirstOrDefaultAsync(p=>p.ID==id,cancellationToken);
 
            
             if (product == null)
             {
                 return NotFound();
             }
-             var relatedProduct = await _context.Products.Include(p => p.Category).AsNoTracking().Where(p => p.CategoryId == product.CategoryId && p.ID != id).ToListAsync(cancellationToken);
+            product.Trafic += 1;
+            _context.SaveChanges();
+             var relatedProduct = await _context.Products.Include(p => p.Category).AsNoTracking().Where(p => p.CategoryId == product.CategoryId && p.ID != id).OrderBy(p => p.Trafic).Skip(0).Take(4).ToListAsync(cancellationToken);
             
             return View(new ProductWithRelatedVM { 
                 product = product,

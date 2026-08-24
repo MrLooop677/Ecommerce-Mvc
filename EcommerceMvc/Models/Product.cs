@@ -9,6 +9,7 @@
         public decimal Price { get; set; }
         public decimal Discount { get; set; }
         public int Quantity { get; set; }
+        public long Trafic { get; set; }
         public int Rate { get; set; }
         public string MainImage { get; set; } = String.Empty;
         public int CategoryId { get; set; }
