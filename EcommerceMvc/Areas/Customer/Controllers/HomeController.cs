@@ -16,6 +16,9 @@ namespace EcommerceMvc.Areas.Customer.Controllers
             _context = context;
         }
 
+     
+
+
         public IActionResult Index(FilterProductVM FilterProductVM,int page=1)
         {
             const decimal discount = 50;
@@ -68,7 +71,18 @@ namespace EcommerceMvc.Areas.Customer.Controllers
             
             return View();
         }
-      
+
+
+        // product details
+        public async Task<IActionResult> Item(int id,CancellationToken cancellationToken)
+        {   
+            var product =await _context.Products.Include(p=>p.Category).AsNoTracking().FirstOrDefaultAsync(p=>p.ID==id,cancellationToken);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
