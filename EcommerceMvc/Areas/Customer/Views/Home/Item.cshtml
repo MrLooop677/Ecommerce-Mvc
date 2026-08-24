@@ -1,4 +1,5 @@
-﻿
+﻿@using EcommerceMvc.ViewModel
+@model ProductWithRelatedVM
 <!-- Product section -->
 <section class="py-5">
     <div class="container px-4 px-lg-5 my-5">
@@ -7,29 +8,40 @@
             <!-- Main Product Image -->
             <div class="col-md-6">
                 <img class="card-img-top mb-5 mb-md-0"
-                     src="https://via.placeholder.com/600x500"
+                     src="~/images/@Model.product.MainImage"
                      alt="Product Image">
             </div>
 
             <!-- Main Product Details -->
             <div class="col-md-6">
                 <div class="small mb-1">
-                    Category Name: Electronics
+                    Category Name: @Model.product.Category.Name
                 </div>
 
                 <h1 class="display-5 fw-bolder">
-                    Wireless Headphones
+                    @Model.product.Name
                 </h1>
 
                 <!-- Price -->
                 <div class="fs-5 mb-5">
-                    <span class="text-decoration-line-through">
-                        $100.00
-                    </span>
+                    @if (Model.product.Discount > 0)
+                    {
+                        <span class="text-decoration-line-through">
+                            @Model.product.Price.ToString("C")
+                        </span>
 
-                    <span>
-                        $80.00
-                    </span>
+                        <span>
+                            @((Model.product.Price -
+                                (Model.product.Price * Model.product.Discount / 100))
+                                .ToString("C"))
+                        </span>
+                    }
+                    else
+                    {
+                        <span>
+                            @Model.product.Price.ToString("C")
+                        </span>
+                    }
                 </div>
 
                 <!-- Description -->
@@ -42,10 +54,10 @@
 
                 <!-- Add to Cart -->
                 <div class="d-flex">
-                    <form action="#" method="post">
+                    <form action="Item" method="post">
                         <input type="hidden"
                                name="productId"
-                               value="1">
+                               value="@Model.product.ID">
 
                         <input class="form-control text-center me-3"
                                id="inputQuantity"
@@ -79,194 +91,79 @@
 
         <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
 
-            <!-- Related Product 1 -->
-            <div class="col mb-5">
-                <div class="card h-100">
+            @foreach (var item in Model.relatedProducts)
+            {
+                <div class="col mb-5">
+                    <div class="card h-100">
 
-                    <div class="badge bg-dark text-white position-absolute"
-                         style="top: 0.5rem; right: 0.5rem">
-                        Sale
-                    </div>
+                        <div class="badge bg-dark text-white position-absolute"
+                             style="top: 0.5rem; right: 0.5rem">
+                            @(item.Discount > 0 ? "Sale" : "New")
+                        </div>
 
-                    <img class="card-img-top"
-                         src="https://via.placeholder.com/450x300"
-                         alt="Product Image">
+                        <img class="card-img-top"
+                             src="~/images/@item.MainImage"
+                             alt="Product Image">
 
-                    <div class="card-body p-4">
-                        <div class="text-center">
+                        <div class="card-body p-4">
+                            <div class="text-center">
 
-                            <h5 class="fw-bolder">
-                                Bluetooth Speaker
-                            </h5>
+                                <h5 class="fw-bolder">
+                                 Name:   @item.Name
+                                </h5>
+                                <h5 class="fw-bolder">
+                                 category:   @item.Category.Name
+                                </h5>
 
-                            <!-- Rating -->
-                            <div class="d-flex justify-content-center small text-warning mb-2">
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
+                                <!-- Rating -->
+                                <div class="star-rating animated-stars">
+
+                                    @for (int i = @item.Rate; i > 0; i--)
+                                    {
+                                        <label class="bi bi-star-fill"></label>
+                                    }2
+
+                                </div>
+
+                                <!-- Price -->
+                                @if (item.Discount > 0)
+                                {
+                                    <span class="text-decoration-line-through">
+                                        @item.Price.ToString("C")
+                                    </span>
+
+                                    <span>
+                                        @((item.Price -
+                                            (item.Price * item.Discount / 100))
+                                            .ToString("C"))
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @item.Price.ToString("C")
+                                    </span>
+                                }
+
                             </div>
-
-                            <!-- Price -->
-                            <span class="text-muted text-decoration-line-through">
-                                $80.00
-                            </span>
-
-                            $60.00
-
                         </div>
-                    </div>
 
-                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                        <div class="text-center">
-                            <a class="btn btn-outline-dark mt-auto"
-                               href="#">
-                                Add to cart
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-
-            <!-- Related Product 2 -->
-            <div class="col mb-5">
-                <div class="card h-100">
-
-                    <div class="badge bg-dark text-white position-absolute"
-                         style="top: 0.5rem; right: 0.5rem">
-                        Sale
-                    </div>
-
-                    <img class="card-img-top"
-                         src="https://via.placeholder.com/450x300"
-                         alt="Product Image">
-
-                    <div class="card-body p-4">
-                        <div class="text-center">
-
-                            <h5 class="fw-bolder">
-                                Smart Watch
-                            </h5>
-
-                            <div class="d-flex justify-content-center small text-warning mb-2">
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                            <div class="text-center">
+                                <a class="btn btn-outline-dark mt-auto"
+                                   href="#">
+                                    Add to cart
+                                </a>
                             </div>
-
-                            <span class="text-muted text-decoration-line-through">
-                                $150.00
-                            </span>
-
-                            $120.00
-
                         </div>
-                    </div>
 
-                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                        <div class="text-center">
-                            <a class="btn btn-outline-dark mt-auto"
-                               href="#">
-                                Add to cart
-                            </a>
-                        </div>
                     </div>
-
                 </div>
-            </div>
 
+            
+            }
 
-            <!-- Related Product 3 -->
-            <div class="col mb-5">
-                <div class="card h-100">
-
-                    <img class="card-img-top"
-                         src="https://via.placeholder.com/450x300"
-                         alt="Product Image">
-
-                    <div class="card-body p-4">
-                        <div class="text-center">
-
-                            <h5 class="fw-bolder">
-                                Wireless Mouse
-                            </h5>
-
-                            <div class="d-flex justify-content-center small text-warning mb-2">
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                            </div>
-
-                            <span class="text-muted text-decoration-line-through">
-                                $50.00
-                            </span>
-
-                            $40.00
-
-                        </div>
-                    </div>
-
-                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                        <div class="text-center">
-                            <a class="btn btn-outline-dark mt-auto"
-                               href="#">
-                                Add to cart
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-
-            <!-- Related Product 4 -->
-            <div class="col mb-5">
-                <div class="card h-100">
-
-                    <img class="card-img-top"
-                         src="https://via.placeholder.com/450x300"
-                         alt="Product Image">
-
-                    <div class="card-body p-4">
-                        <div class="text-center">
-
-                            <h5 class="fw-bolder">
-                                Gaming Keyboard
-                            </h5>
-
-                            <div class="d-flex justify-content-center small text-warning mb-2">
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                                <div class="bi-star-fill"></div>
-                            </div>
-
-                            <span class="text-muted text-decoration-line-through">
-                                $120.00
-                            </span>
-
-                            $90.00
-
-                        </div>
-                    </div>
-
-                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                        <div class="text-center">
-                            <a class="btn btn-outline-dark mt-auto"
-                               href="#">
-                                Add to cart
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+           
 
         </div>
     </div>

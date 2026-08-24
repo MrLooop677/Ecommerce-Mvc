@@ -9,7 +9,7 @@ namespace EcommerceMvc.Areas.Customer.Controllers
     [Area("Customer")]
     public class HomeController : Controller
     {
-        private ApplicationDbContext _context = new();
+        private readonly ApplicationDbContext _context;
 
         public HomeController(ApplicationDbContext context)
         {
@@ -77,11 +77,19 @@ namespace EcommerceMvc.Areas.Customer.Controllers
         public async Task<IActionResult> Item(int id,CancellationToken cancellationToken)
         {   
             var product =await _context.Products.Include(p=>p.Category).AsNoTracking().FirstOrDefaultAsync(p=>p.ID==id,cancellationToken);
+
+           
             if (product == null)
             {
                 return NotFound();
             }
-            return View(product);
+             var relatedProduct = await _context.Products.Include(p => p.Category).AsNoTracking().Where(p => p.CategoryId == product.CategoryId && p.ID != id).ToListAsync(cancellationToken);
+            
+            return View(new ProductWithRelatedVM { 
+                product = product,
+                relatedProducts = relatedProduct
+            
+            });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
