@@ -16,36 +16,90 @@ namespace EcommerceMvc.Areas.Customer.Controllers
             _userManager = userManager;
             _cartRepository = cartRepository;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
-        public async Task<IActionResult> AddToCart(int productId,int count,CancellationToken cancellationToken) {
+
             var user = await _userManager.GetUserAsync(User);
-            if(user is null)
+            if (user is null)
+                return NotFound();
+
+            var cart = await _cartRepository.GetAsync(e => e.ApplicationUserId == user.Id, includes: [e => e.Product, e => e.ApplicationUser]);
+
+            return View(cart);
+        }
+        public async Task<IActionResult> AddToCart(int productId, int count, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
                 return NotFound();
 
 
-            var productInDB = await _cartRepository.GetOneAsync(e=>e.ProductId==productId && e.ApplicationUserId==user.Id);
+            var productInDB = await _cartRepository.GetOneAsync(e => e.ProductId == productId && e.ApplicationUserId == user.Id);
 
-            if(productInDB != null)
+            if (productInDB != null)
             {
                 productInDB.count += count;
                 await _cartRepository.CommitAsync(cancellationToken);
                 TempData["success"] = "Product added to cart successfully!";
                 return RedirectToAction("Index", "Home");
             }
-           await _cartRepository.AddAsync(new() {
+            await _cartRepository.AddAsync(new()
+            {
 
-               ProductId = productId,
-               ApplicationUserId = user.Id,
-               count = count,
+                ProductId = productId,
+                ApplicationUserId = user.Id,
+                count = count,
 
-           },cancellationToken);
+            }, cancellationToken);
             await _cartRepository.CommitAsync(cancellationToken);
             TempData["success"] = "Product added to cart successfully!";
-            return RedirectToAction("Index","Home");
-        
+            return RedirectToAction("Index", "Home");
+
+        }
+
+
+        public async Task<IActionResult> IncreamentProduct(int productId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+                return NotFound();
+            var product = await _cartRepository.GetOneAsync(e => e.ProductId == productId && e.ApplicationUserId == user.Id);
+            if (product == null) return NotFound();
+
+            product.count++;
+            await _cartRepository.CommitAsync(cancellationToken);
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> DecreamentProduct(int productId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+                return NotFound();
+            var product = await _cartRepository.GetOneAsync(e => e.ProductId == productId && e.ApplicationUserId == user.Id);
+            if (product == null) return NotFound();
+
+
+            if (product.count <= 1)
+                _cartRepository.Delete(product);
+
+            else
+                product.count--;
+
+            await _cartRepository.CommitAsync(cancellationToken);
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> DeleteProduct(int productId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+                return NotFound();
+            var product = await _cartRepository.GetOneAsync(e => e.ProductId == productId && e.ApplicationUserId == user.Id);
+            if (product == null) return NotFound();
+            _cartRepository.Delete(product);
+            await _cartRepository.CommitAsync(cancellationToken);
+            return RedirectToAction("Index");
         }
     }
 }
