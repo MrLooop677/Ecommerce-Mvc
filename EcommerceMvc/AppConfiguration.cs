@@ -41,6 +41,7 @@ namespace EcommerceMvc
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IRepository<Category>, Repository<Category>>();
             services.AddScoped<IRepository<Brand>, Repository<Brand>>();
+            services.AddScoped<IRepository<Promotion>, Repository<Promotion>>();
             services.AddScoped<IRepository<Product>, Repository<Product>>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IRepository<ProductSubImg>, Repository<ProductSubImg>>();

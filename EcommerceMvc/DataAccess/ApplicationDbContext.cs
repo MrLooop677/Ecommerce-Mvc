@@ -19,6 +19,8 @@ namespace EcommerceMvc.DataAccess
         public DbSet<ProductSubImg> ProductSubImages { get; set; }
         public DbSet<ApplicationUserOtp> ApplicationUserOtps { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+
 
 
         //override protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

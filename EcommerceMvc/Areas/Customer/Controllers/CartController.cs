@@ -10,21 +10,27 @@ namespace EcommerceMvc.Areas.Customer.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRepository<Cart> _cartRepository;
+        private readonly IRepository<Promotion> _promotionRepository;
 
-        public CartController(UserManager<ApplicationUser> userManager, IRepository<Cart> cartRepository)
+        public CartController(UserManager<ApplicationUser> userManager, IRepository<Cart> cartRepository, IRepository<Promotion> promotionRepository)
         {
             _userManager = userManager;
             _cartRepository = cartRepository;
+            _promotionRepository = promotionRepository;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string code)
         {
 
             var user = await _userManager.GetUserAsync(User);
             if (user is null)
                 return NotFound();
-
+            var promotion = await _promotionRepository.GetOneAsync(e => e.Code == code && e.IsValid);
             var cart = await _cartRepository.GetAsync(e => e.ApplicationUserId == user.Id, includes: [e => e.Product, e => e.ApplicationUser]);
 
+            if (promotion is not null) { 
+            0000000000000000
+              var result= cart.FirstOrDefault(e=>e.ProductId==promotion.ProductId);
+            }
             return View(cart);
         }
         public async Task<IActionResult> AddToCart(int productId, int count, CancellationToken cancellationToken)

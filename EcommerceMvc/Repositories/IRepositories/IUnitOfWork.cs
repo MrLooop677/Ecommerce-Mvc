@@ -8,6 +8,7 @@ namespace EcommerceMvc.Repositories.IRepositories
         IProductRepository ProductRepository { get; }
         IRepository<Category> CategoryRepository { get; }
         IRepository<Brand> BrandRepository { get; }
+        IRepository<Promotion> PromotionRepository { get; }
         IRepository<ProductColor> ProductColorRepository { get; }
         IRepository<ProductSubImg> ProductSubImgRepository { get; }
         Task CommitAsync(CancellationToken cancellationToken = default);

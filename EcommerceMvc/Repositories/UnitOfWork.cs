@@ -12,6 +12,7 @@ namespace EcommerceMvc.Repositories
             IRepository<Brand> brandRepository,
             IRepository<ProductColor> productColorRepository,
             IRepository<ProductSubImg> productSubImgRepository,
+            IRepository<Promotion> promotionRepository,
             ApplicationDbContext context
             )
         {
@@ -20,6 +21,7 @@ namespace EcommerceMvc.Repositories
             BrandRepository = brandRepository;
             ProductColorRepository = productColorRepository;
             ProductSubImgRepository = productSubImgRepository;
+            PromotionRepository = promotionRepository;
             _context = context;
         }
         public void Dispose()
@@ -36,6 +38,7 @@ namespace EcommerceMvc.Repositories
 
         public IRepository<ProductColor> ProductColorRepository { get; }
         public IRepository<ProductSubImg> ProductSubImgRepository {get;}
+        public IRepository<Promotion> PromotionRepository {get;}
 
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
