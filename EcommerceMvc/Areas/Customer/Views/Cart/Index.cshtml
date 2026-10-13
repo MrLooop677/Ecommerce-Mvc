@@ -38,7 +38,7 @@
                                 <a asp-action="DecreamentProduct" asp-route-productId="@item.ProductId" class="btn btn-outline-secondary">-</a>
                                 </div>
                                 <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                    <h5 class="mb-0">@item.Product.Price.ToString("c")</h5>
+                                    <h5 class="mb-0">@item.Price.ToString("c")</h5>
                                 </div>
                                 <div class="col-md-1 col-lg-1 col-xl-1 text-end">
                                 <a asp-action="DeleteProduct" asp-route-productId="@item.ProductId" class="btn btn-outline-danger">Delete</a>
@@ -50,13 +50,19 @@
 
                 <div class="card mb-4">
                     <div class="card-body p-4 d-flex flex-row">
-                        <form asp-action="Index">
-                            <div data-mdb-input-init class="form-outline flex-fill">
-                                <input name="code" type="text" id="form1" class="form-control form-control-lg" />
-                                <label class="form-label" for="form1">Discound code</label>
-                            </div>
-                            <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-warning btn-lg ms-3">Apply</button>
-                        </form>
+                    <form asp-action="ApplyPromotion" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input name="code"
+                               type="text"
+                               class="form-control form-control-lg"
+                               placeholder="Discount code" />
+
+                        <button type="submit"
+                                class="btn btn-outline-warning btn-lg ms-3">
+                            Apply
+                        </button>
+                    </form>
                     </div>
                 </div>
 

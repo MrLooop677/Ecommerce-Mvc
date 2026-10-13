@@ -162,6 +162,9 @@ namespace EcommerceMvc.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("count")
                         .HasColumnType("int");
 
