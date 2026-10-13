@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Stripe.Checkout;
 
 namespace EcommerceMvc.Areas.Customer.Controllers
 {
@@ -13,7 +14,7 @@ namespace EcommerceMvc.Areas.Customer.Controllers
         private readonly IRepository<Promotion> _promotionRepository;
         private readonly IRepository<Product> _productRepository;
 
-        public CartController(UserManager<ApplicationUser> userManager, IRepository<Cart> cartRepository, IRepository<Promotion> promotionRepository,IRepository<Product> productRepository)
+        public CartController(UserManager<ApplicationUser> userManager, IRepository<Cart> cartRepository, IRepository<Promotion> promotionRepository, IRepository<Product> productRepository)
         {
             _userManager = userManager;
             _cartRepository = cartRepository;
@@ -111,7 +112,6 @@ namespace EcommerceMvc.Areas.Customer.Controllers
             if (user is null)
                 return NotFound();
 
-
             var cart = await _cartRepository.GetOneAsync(e => e.ProductId == productId && e.ApplicationUserId == user.Id);
 
             if (cart != null)
@@ -179,6 +179,55 @@ namespace EcommerceMvc.Areas.Customer.Controllers
             _cartRepository.Delete(product);
             await _cartRepository.CommitAsync(cancellationToken);
             return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> Pay()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+                return NotFound();
+
+            var cart = await _cartRepository.GetAsync(c => c.ApplicationUserId == user.Id,includes: [c => c.Product]);
+            var options = new SessionCreateOptions
+            {
+                AllowedPaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>(),  
+                Mode = "payment",
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/customer/checkout/success",
+                CancelUrl = $"{Request.Scheme}://{Request.Host}/customer/checkout/cancel",
+            };
+
+
+
+            foreach (var item in cart)
+            {
+
+                options.LineItems.Add(
+
+                       new SessionLineItemOptions
+                       {
+                           PriceData = new SessionLineItemPriceDataOptions
+                           {
+                               Currency = "egp",
+                               ProductData = new SessionLineItemPriceDataProductDataOptions
+                               {
+                                   Name = item.Product.Name,
+                                   Description = item.Product.Description,
+                                   //etc.. any data you need showing in cart payment 
+                               },
+                               UnitAmount =(long) item.Price *100,
+                           },
+                           Quantity = item.count,
+                       }
+                    ); 
+            }
+
+
+
+
+            var service = new SessionService(); 
+            var session = service.Create(options);
+            return Redirect(session.Url);
+
         }
     }
 }

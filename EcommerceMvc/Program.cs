@@ -1,7 +1,9 @@
 using EcommerceMvc;
 using EcommerceMvc.Configurations;
+using EcommerceMvc.Utitlies;
 using EcommerceMvc.Utitlies.DBInitializer;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
@@ -16,7 +18,10 @@ var connectionString =
 
 //AppConfiguration.RegisterConfiguration(builder.Services, connectionString);
 builder.Services.RegisterConfiguration( connectionString, builder.Configuration);
-builder.Services.RegisterMapsterConfig(); 
+builder.Services.RegisterMapsterConfig();
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 var app = builder.Build();
 var scope=app.Services.CreateScope();
 var services = scope.ServiceProvider.GetService<IDBInitializer>();
